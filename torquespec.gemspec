@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.platform    = Gem::Platform::RUBY
   s.authors     = ["Jim Crossley", "Bob McWhirter"]
   s.email       = "team@projectodd.org"
-  s.homepage    = "http://torquebox.org/torquespec"
+  s.homepage    = "http://github.com/torquebox/torquespec"
   s.summary     = %q{Deploy TorqueBox knobs to a running JBoss instance}
   s.description = %q{Write integration tests around the deployment of your app to a real JBoss app server}
 
