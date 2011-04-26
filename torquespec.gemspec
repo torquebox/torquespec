@@ -4,13 +4,13 @@ require "torquespec/version"
 
 Gem::Specification.new do |s|
   s.name        = "torquespec"
-  s.version     = Torquespec::VERSION
+  s.version     = TorqueSpec::VERSION
   s.platform    = Gem::Platform::RUBY
-  s.authors     = ["TODO: Write your name"]
-  s.email       = ["TODO: Write your email address"]
-  s.homepage    = ""
-  s.summary     = %q{TODO: Write a gem summary}
-  s.description = %q{TODO: Write a gem description}
+  s.authors     = ["Jim Crossley", "Bob McWhirter"]
+  s.email       = "team@projectodd.org"
+  s.homepage    = "http://torquebox.org/torquespec"
+  s.summary     = %q{Deploy TorqueBox knobs to a running JBoss instance}
+  s.description = %q{Write integration tests around the deployment of your app to a real JBoss app server}
 
   s.rubyforge_project = "torquespec"
 
