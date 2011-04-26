@@ -1,3 +1,2 @@
-module Torquespec
-  # Your code goes here...
-end
+require 'torquespec/torquespec'
+require 'torquespec/rspec'
