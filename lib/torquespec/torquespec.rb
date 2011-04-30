@@ -1,11 +1,16 @@
-require 'pathname'
+require 'torquespec/deployment_descriptor'
 
 module TorqueSpec
 
-  def deploy(*paths)
+  # Accepts any combination of hashes, filenames, or heredocs
+  def deploy(*descriptors)
+    paths = descriptors.map do |descriptor| 
+      DeploymentDescriptor.new(descriptor, self.display_name).path
+    end
     metaclass = class << self; self; end
     metaclass.send(:define_method, :deploy_paths) do
-      paths.map {|p| Pathname.new(p).absolute? ? p : File.join(TorqueSpec.knob_root, p) }
+      FileUtils.mkdir_p(TorqueSpec.knob_root) unless File.exist?(TorqueSpec.knob_root)
+      paths
     end
   end
 
@@ -23,6 +28,7 @@ end
 
 # Default TorqueSpec options
 TorqueSpec.configure do |config|
+  config.knob_root = ".torquespec"
   config.lazy = true
   config.host = 'localhost'
   config.port = 8080
