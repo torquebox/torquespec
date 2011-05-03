@@ -4,13 +4,12 @@ module TorqueSpec
 
   # Accepts any combination of hashes, filenames, or heredocs
   def deploy(*descriptors)
-    paths = descriptors.map do |descriptor| 
-      DeploymentDescriptor.new(descriptor, self.display_name).path
-    end
     metaclass = class << self; self; end
     metaclass.send(:define_method, :deploy_paths) do
       FileUtils.mkdir_p(TorqueSpec.knob_root) unless File.exist?(TorqueSpec.knob_root)
-      paths
+      descriptors.map do |descriptor| 
+        DeploymentDescriptor.new(descriptor, self.display_name).path
+      end
     end
   end
 
