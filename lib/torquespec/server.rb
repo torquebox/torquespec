@@ -28,8 +28,9 @@ module TorqueSpec
     end
 
     def stop
-      return if TorqueSpec.lazy
-      if @process
+      if TorqueSpec.lazy
+        puts "JBoss still running, pid=#{@process.pid}"
+      elsif @process
         unless clean_stop
           puts "Unable to shutdown JBoss cleanly, interrupting process"
           Process.kill("INT", @process.pid) 
