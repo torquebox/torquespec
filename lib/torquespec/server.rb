@@ -4,15 +4,21 @@ module TorqueSpec
   class Server
     
     def start(opts={})
-      return if TorqueSpec.lazy and ready?
-      wait = opts[:wait].to_i
-      raise "JBoss is already running" if ready?
-      cmd = command
-      @process = IO.popen( cmd )
-      Thread.new(@process) { |console| while(console.gets); end }
-      %w{ INT TERM KILL }.each { |signal| trap(signal) { stop } }
-      puts "#{cmd}\npid=#{@process.pid}"
-      wait > 0 ? wait_for_ready(wait) : @process.pid
+      if TorqueSpec.lazy and ready?
+        @pid = read_pid_file
+        puts "Detected running JBoss\npid=#{@pid}"
+      else
+        wait = opts[:wait].to_i
+        raise "JBoss is already running" if ready?
+        cmd = command
+        process = IO.popen( cmd )
+        @pid = process.pid
+        write_pid_file
+        Thread.new(process) { |console| while(console.gets); end }
+        %w{ INT TERM KILL }.each { |signal| trap(signal) { stop } }
+        puts "#{cmd}\npid=#{@pid}"
+        wait > 0 ? wait_for_ready(wait) : @pid
+      end
     end
 
     def deploy(url)
@@ -29,13 +35,14 @@ module TorqueSpec
 
     def stop
       if TorqueSpec.lazy
-        puts "JBoss still running, pid=#{@process.pid}"
-      elsif @process
+        puts "JBoss still running, pid=#{@pid}"
+      elsif @pid
         unless clean_stop
-          puts "Unable to shutdown JBoss cleanly, interrupting process"
-          Process.kill("INT", @process.pid) 
+          puts "Unable to shutdown JBoss cleanly, interrupting process, pid=#{@pid}"
+          Process.kill("INT", @pid)
         end
-        @process = nil
+        delete_pid_file
+        @pid = nil
         puts "JBoss stopped"
       end
     end
@@ -56,7 +63,7 @@ module TorqueSpec
     def wait_for_ready(timeout)
       puts "Waiting up to #{timeout}s for JBoss to boot"
       t0 = Time.now
-      while (Time.now - t0 < timeout && @process) do
+      while (Time.now - t0 < timeout && @pid) do
         if ready?
           puts "JBoss started in #{(Time.now - t0).to_i}s"
           return true
@@ -67,6 +74,26 @@ module TorqueSpec
     end
 
     protected
+
+    def pid_file
+      File.join(TorqueSpec.knob_root, "pid")
+    end
+
+    def write_pid_file
+      File.open(pid_file, "w") do |file|
+        file.write(@pid)
+      end
+    end
+
+    def read_pid_file
+      File.open(pid_file, "r") do |file|
+        file.read
+      end if File.exist?(pid_file)
+    end
+
+    def delete_pid_file
+      File.delete(pid_file)
+    end
 
     def command
       java_home = java.lang::System.getProperty( 'java.home' )
