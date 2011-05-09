@@ -4,15 +4,26 @@ module TorqueSpec
   class Server
     
     def start(opts={})
-      return if TorqueSpec.lazy and ready?
+      if ready?
+        if TorqueSpec.lazy
+          puts "Using running JBoss (set lazy=false if you get errors)"
+          return
+        else
+          stop
+          puts "Waiting for running JBoss to shutdown"
+          sleep(3)
+          while ready? do
+            sleep(1)
+          end
+        end
+      end
       wait = opts[:wait].to_i
-      raise "JBoss is already running" if ready?
       cmd = command
-      @process = IO.popen( cmd )
-      Thread.new(@process) { |console| while(console.gets); end }
+      process = IO.popen( cmd )
+      Thread.new(process) { |console| while(console.gets); end }
       %w{ INT TERM KILL }.each { |signal| trap(signal) { stop } }
-      puts "#{cmd}\npid=#{@process.pid}"
-      wait > 0 ? wait_for_ready(wait) : @process.pid
+      puts "#{cmd}\npid=#{process.pid}"
+      wait > 0 ? wait_for_ready(wait) : process.pid
     end
 
     def deploy(url)
@@ -29,18 +40,14 @@ module TorqueSpec
 
     def stop
       if TorqueSpec.lazy
-        puts "JBoss still running, pid=#{@process.pid}"
-      elsif @process
-        unless clean_stop
-          puts "Unable to shutdown JBoss cleanly, interrupting process"
-          Process.kill("INT", @process.pid) 
-        end
-        @process = nil
-        puts "JBoss stopped"
+        puts "JBoss won't be stopped (lazy=true)"
+      else
+        shutdown
+        puts "Shutdown message sent to JBoss"
       end
     end
 
-    def clean_stop
+    def shutdown
       success?( jmx_console( :action     => 'invokeOpByName', 
                              :name       => 'jboss.system:type=Server', 
                              :methodName => 'shutdown' ) )
@@ -56,7 +63,7 @@ module TorqueSpec
     def wait_for_ready(timeout)
       puts "Waiting up to #{timeout}s for JBoss to boot"
       t0 = Time.now
-      while (Time.now - t0 < timeout && @process) do
+      while (Time.now - t0 < timeout) do
         if ready?
           puts "JBoss started in #{(Time.now - t0).to_i}s"
           return true
