@@ -6,24 +6,25 @@ module TorqueSpec
     def start(opts={})
       if ready?
         if TorqueSpec.lazy
-          puts "Using running JBoss (set lazy=false if you get errors)"
+          puts "Using running JBoss (try lazy=false if you get errors)"
           return
         else
           stop
           puts "Waiting for running JBoss to shutdown"
-          sleep(3)
-          while ready? do
-            sleep(1)
-          end
+          sleep(5)
+          sleep(1) while ready?
         end
       end
-      wait = opts[:wait].to_i
-      cmd = command
-      process = IO.popen( cmd )
-      Thread.new(process) { |console| while(console.gets); end }
-      %w{ INT TERM KILL }.each { |signal| trap(signal) { stop } }
-      puts "#{cmd}\npid=#{process.pid}"
-      wait > 0 ? wait_for_ready(wait) : process.pid
+      startup(opts)
+    end
+
+    def stop
+      if TorqueSpec.lazy
+        puts "JBoss won't be stopped (lazy=true)"
+      else
+        shutdown
+        puts "Shutdown message sent to JBoss"
+      end
     end
 
     def deploy(url)
@@ -36,21 +37,6 @@ module TorqueSpec
     def undeploy(url)
       success?( deployer( 'undeploy', url ) )
       puts "  undeployed #{url.split('/')[-1]}"
-    end
-
-    def stop
-      if TorqueSpec.lazy
-        puts "JBoss won't be stopped (lazy=true)"
-      else
-        shutdown
-        puts "Shutdown message sent to JBoss"
-      end
-    end
-
-    def shutdown
-      success?( jmx_console( :action     => 'invokeOpByName', 
-                             :name       => 'jboss.system:type=Server', 
-                             :methodName => 'shutdown' ) )
     end
 
     def ready?
@@ -74,6 +60,22 @@ module TorqueSpec
     end
 
     protected
+
+    def startup(opts)
+      wait = opts[:wait].to_i
+      cmd = command
+      process = IO.popen( cmd )
+      Thread.new(process) { |console| while(console.gets); end }
+      %w{ INT TERM KILL }.each { |signal| trap(signal) { stop } }
+      puts "#{cmd}\npid=#{process.pid}"
+      wait > 0 ? wait_for_ready(wait) : process.pid
+    end
+
+    def shutdown
+      success?( jmx_console( :action     => 'invokeOpByName', 
+                             :name       => 'jboss.system:type=Server', 
+                             :methodName => 'shutdown' ) )
+    end
 
     def command
       java_home = java.lang::System.getProperty( 'java.home' )
