@@ -2,7 +2,7 @@ require 'net/http'
 
 module TorqueSpec
   class Server
-    
+
     def start(opts={})
       if ready?
         if TorqueSpec.lazy
@@ -19,6 +19,8 @@ module TorqueSpec
     end
 
     def stop
+      return if stopped
+      self.stopped = true
       if TorqueSpec.lazy
         puts "JBoss won't be stopped (lazy=true)"
       else
@@ -49,7 +51,7 @@ module TorqueSpec
     def wait_for_ready(timeout)
       puts "Waiting up to #{timeout}s for JBoss to boot"
       t0 = Time.now
-      while (Time.now - t0 < timeout) do
+      while (Time.now - t0 < timeout && !stopped) do
         if ready?
           puts "JBoss started in #{(Time.now - t0).to_i}s"
           return true
@@ -112,6 +114,7 @@ module TorqueSpec
       res.body
     end
 
+    attr_accessor :stopped
   end
 
 end
