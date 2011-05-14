@@ -1,4 +1,5 @@
 require 'net/http'
+require 'java'
 
 module TorqueSpec
   class Server
