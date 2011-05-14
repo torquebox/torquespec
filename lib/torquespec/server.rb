@@ -14,6 +14,7 @@ module TorqueSpec
           puts "Waiting for running JBoss to shutdown"
           sleep(5)
           sleep(1) while ready?
+          self.stopped = false
         end
       end
       startup(opts)

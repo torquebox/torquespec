@@ -28,7 +28,7 @@ end
 # Default TorqueSpec options
 TorqueSpec.configure do |config|
   config.knob_root = ".torquespec"
-  config.lazy = true
+  config.lazy = false
   config.host = 'localhost'
   config.port = 8080
   config.jboss_home = ENV['JBOSS_HOME']
