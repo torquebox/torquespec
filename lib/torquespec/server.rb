@@ -1,5 +1,4 @@
 require 'net/http'
-require 'java'
 
 module TorqueSpec
   class Server
@@ -82,8 +81,8 @@ module TorqueSpec
     end
 
     def command
-      java_home = java.lang::System.getProperty( 'java.home' )
-      "#{java_home}/bin/java -cp #{TorqueSpec.jboss_home}/bin/run.jar #{TorqueSpec.jvm_args} -Djava.endorsed.dirs=#{TorqueSpec.jboss_home}/lib/endorsed org.jboss.Main -c #{TorqueSpec.jboss_conf} -b #{TorqueSpec.host}"
+      raise "JAVA_HOME is not set" unless ENV['JAVA_HOME']
+      "#{ENV['JAVA_HOME']}/bin/java -cp #{TorqueSpec.jboss_home}/bin/run.jar #{TorqueSpec.jvm_args} -Djava.endorsed.dirs=#{TorqueSpec.jboss_home}/lib/endorsed org.jboss.Main -c #{TorqueSpec.jboss_conf} -b #{TorqueSpec.host}"
     end
 
     def deployer(method, url)
