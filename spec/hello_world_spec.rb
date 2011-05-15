@@ -1,7 +1,7 @@
 require 'torquespec'
 require 'open-uri'
 
-TorqueSpec.lazy = true
+TorqueSpec.lazy = false
 
 describe "simple deployment" do
   
