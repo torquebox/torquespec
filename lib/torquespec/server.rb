@@ -6,11 +6,7 @@ module TorqueSpec
   class Server
 
     def initialize
-      if File.exist?( File.join( TorqueSpec.jboss_home, "bin/run.sh" ) )
-        self.extend AS6
-      else
-        self.extend AS7
-      end
+      self.extend( TorqueSpec.as7? ? AS7 : AS6 )
     end
 
     def start(opts={})

@@ -10,7 +10,7 @@ module TorqueSpec
       @path = Pathname.new( name.gsub(/\W/,'_') + "-knob.yml" ).expand_path( TorqueSpec.knob_root )
     end
     def path
-      hash || filename || heredoc
+      archive( hash || filename || heredoc )
     end
     def hash
       if @descriptor.is_a? Hash
@@ -31,6 +31,15 @@ module TorqueSpec
         file.write(@descriptor)
       end
       @path.to_s
+    end
+    def archive(path)
+      if TorqueSpec.as7? && path.end_with?('.yml')
+        jar = path.sub(/yml$/,'jar')
+        `jar cf #{jar} -C #{File.dirname(path)} #{File.basename(path)}`
+        jar
+      else
+        path
+      end
     end
     def stringify_keys(x)
       x.is_a?(Hash) ? x.inject({}) {|h,(k,v)| h[k.to_s] = stringify_keys(v); h} : x

@@ -14,12 +14,15 @@ module TorqueSpec
   end
 
   class << self
-    attr_accessor :host, :port, :knob_root, :jboss_home, :jboss_conf, :jvm_args, :max_heap, :lazy
+    attr_accessor :knob_root, :jboss_home, :jvm_args, :max_heap, :lazy
     def configure
       yield self
     end
     def jvm_args
       max_heap ? @jvm_args.sub(/-Xmx\w+/, "-Xmx#{max_heap}") : @jvm_args
+    end
+    def as7?
+      File.exist?( File.join( jboss_home, "bin/standalone.sh" ) )
     end
   end
 
@@ -28,9 +31,7 @@ end
 # Default TorqueSpec options
 TorqueSpec.configure do |config|
   config.knob_root = ".torquespec"
-  config.lazy = false
   config.jboss_home = ENV['JBOSS_HOME']
-  config.jboss_conf = 'default'
   config.jvm_args = "-Xms64m -Xmx1024m -XX:MaxPermSize=512m -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:+CMSClassUnloadingEnabled -Djruby_home.env.ignore=true -Dgem.path=default"
 end
 
