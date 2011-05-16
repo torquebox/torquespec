@@ -31,6 +31,6 @@ TorqueSpec.configure do |config|
   config.lazy = false
   config.jboss_home = ENV['JBOSS_HOME']
   config.jboss_conf = 'default'
-  config.jvm_args = "-Xmx1024m -XX:MaxPermSize=512m -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:+CMSClassUnloadingEnabled -Djruby_home.env.ignore=true -Dgem.path=default"
+  config.jvm_args = "-Xms64m -Xmx1024m -XX:MaxPermSize=512m -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:+CMSClassUnloadingEnabled -Djruby_home.env.ignore=true -Dgem.path=default"
 end
 

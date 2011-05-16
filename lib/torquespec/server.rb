@@ -1,11 +1,16 @@
 require 'net/http'
 require 'torquespec/as6'
+require 'torquespec/as7'
 
 module TorqueSpec
   class Server
 
     def initialize
-      self.extend AS6
+      if File.exist?( File.join( TorqueSpec.jboss_home, "bin/run.sh" ) )
+        self.extend AS6
+      else
+        self.extend AS7
+      end
     end
 
     def start(opts={})
@@ -74,7 +79,11 @@ module TorqueSpec
 
     def post(path, params)
       req = Net::HTTP::Post.new(path)
-      req.set_form_data( params )
+      if (params.is_a? Hash)
+        req.set_form_data( params )
+      else
+        req.body = params
+      end
       http( req )
     end
 
