@@ -7,8 +7,9 @@ module TorqueSpec
     metaclass = class << self; self; end
     metaclass.send(:define_method, :deploy_paths) do
       FileUtils.mkdir_p(TorqueSpec.knob_root) unless File.exist?(TorqueSpec.knob_root)
+      i = descriptors.size > 1 ? 0 : nil
       descriptors.map do |descriptor| 
-        DeploymentDescriptor.new(descriptor, self.display_name).path
+        DeploymentDescriptor.new(descriptor, "#{self.display_name}#{i&&i-=1}").path
       end
     end
   end
