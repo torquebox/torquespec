@@ -26,6 +26,7 @@ module TorqueSpec
     end
 
     def stop
+      cleanup
       return if stopped
       self.stopped = true
       if TorqueSpec.lazy
@@ -38,14 +39,14 @@ module TorqueSpec
 
     def deploy(url)
       t0 = Time.now
-      puts "#{url}"
+      puts " deploying #{url}"
       _deploy(url)
-      puts "  deployed in #{(Time.now - t0).to_i}s"
+      puts "  deployed #{url} in #{(Time.now - t0).to_i}s"
     end
 
     def undeploy(url)
       _undeploy(url)
-      puts "  undeployed #{url.split('/')[-1]}"
+      puts "   removed #{url}"
     end
 
     def wait_for_ready(timeout)
@@ -59,6 +60,10 @@ module TorqueSpec
         sleep(1)
       end
       raise "JBoss failed to start"
+    end
+
+    def cleanup
+      # modules may mixin if needed
     end
 
     protected
