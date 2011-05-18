@@ -57,7 +57,7 @@ module TorqueSpec
     private
 
     def domain_api(params)
-      post('/domain-api', params.to_json)
+      post('/domain-api', params.merge('json.pretty' => 1).to_json)
     end
 
     def urlify(path)
