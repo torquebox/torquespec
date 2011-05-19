@@ -20,26 +20,25 @@ module TorqueSpec
     end
 
     def _deploy(path)
-      url = urlify(path)
-      response = JSON.parse( domain_api( :operation => "add",
-                                         :address   => [ "deployment", url ],
-                                         :url       => url ) )
-      if response['outcome']=='success'
-        deployments[path] = response['compensating-operation']
-        domain_api( :operation => "deploy",
-                    :address   => [ "deployment", url ] )
-      else
-        response.to_json
+      once = true
+      begin
+        domain_api( :operation => "add",
+                    :address   => [ "deployment", addressify(path) ],
+                    :url       => urlify(path) )
+      rescue Exception
+        _undeploy(path)
+        if once
+          once = false
+          retry
+        end
       end
+      domain_api( :operation => "deploy",
+                  :address   => [ "deployment", addressify(path) ] )
     end
 
     def _undeploy(path)
-      if deployments.has_key?(path)
-        domain_api( deployments.delete(path) )
-      else
-        domain_api( :operation => "remove",
-                    :address   => [ "deployment", urlify(path) ] )
-      end
+      domain_api( :operation => "remove",
+                  :address   => [ "deployment", addressify(path) ] )
     end
 
     def ready?
@@ -50,10 +49,6 @@ module TorqueSpec
       false
     end
 
-    def cleanup
-      deployments.keys.each { |k| domain_api( deployments.delete(k) ) }
-    end
-    
     private
 
     def domain_api(params)
@@ -63,9 +58,9 @@ module TorqueSpec
     def urlify(path)
       URI.parse(path).scheme.nil? ? "file:#{path}" : path
     end
-
-    def deployments
-      @deployments ||= {}
+    
+    def addressify(path)
+      File.basename(path)
     end
   end
 end

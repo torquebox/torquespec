@@ -26,7 +26,6 @@ module TorqueSpec
     end
 
     def stop
-      cleanup
       return if stopped
       self.stopped = true
       if TorqueSpec.lazy
@@ -60,10 +59,6 @@ module TorqueSpec
         sleep(1)
       end
       raise "JBoss failed to start"
-    end
-
-    def cleanup
-      # modules may mixin if needed
     end
 
     protected

@@ -25,3 +25,14 @@ describe "simple directory deployment" do
     response.strip.should == "Hello World!"
   end
 end
+
+describe "war deployment" do
+  
+  deploy File.join( File.dirname(__FILE__), "../apps/node-info.war" )
+
+  it "should greet the world" do
+    response = open("http://localhost:8080/node-info") {|f| f.read}
+    response.should include( 'JBoss-Cloud node info' )
+  end
+end
+
