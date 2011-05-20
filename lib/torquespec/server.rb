@@ -38,14 +38,14 @@ module TorqueSpec
 
     def deploy(url)
       t0 = Time.now
-      puts " deploying #{url}"
+      print "deploy #{url} "
+      $stdout.flush
       _deploy(url)
-      puts "  deployed #{url} in #{(Time.now - t0).to_i}s"
+      puts "in #{(Time.now - t0).to_i}s"
     end
 
     def undeploy(url)
       _undeploy(url)
-      puts "   removed #{url}"
     end
 
     def wait_for_ready(timeout)
@@ -85,11 +85,11 @@ module TorqueSpec
 
     def http req
       res = Net::HTTP.start('localhost', port) do |http| 
-        http.read_timeout = 180
+        http.read_timeout = 360
         http.request(req)
       end
       unless Net::HTTPSuccess === res
-        STDERR.puts res.body
+        $stderr.puts res.body
         res.error!
       end
       res.body

@@ -36,3 +36,14 @@ describe "war deployment" do
   end
 end
 
+describe "missing knob handling" do
+  
+  it "should toss an error for a missing descriptor" do
+    server = TorqueSpec::Server.new
+    lambda {
+      server.deploy "this-file-does-not-exist.yml"
+    }.should raise_error
+  end
+
+end
+
