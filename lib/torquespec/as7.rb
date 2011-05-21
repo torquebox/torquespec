@@ -24,12 +24,14 @@ module TorqueSpec
       begin
         domain_api( :operation => "add",
                     :address   => [ "deployment", addressify(path) ],
-                    :url       => urlify(path) )
-      rescue Exception
+                    :content   => [ { :url=>urlify(path)} ] )
+      rescue Exception=>e
         _undeploy(path)
         if once
           once = false
           retry
+        else
+          raise e 
         end
       end
       domain_api( :operation => "deploy",
