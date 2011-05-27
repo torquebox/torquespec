@@ -3,12 +3,14 @@ require 'torquespec/deployment_descriptor'
 module TorqueSpec
 
   # Accepts any combination of hashes, filenames, or heredocs
-  def deploy(*descriptors)
+  def deploy(*descriptors, &block)
     metaclass = class << self; self; end
     metaclass.send(:define_method, :deploy_paths) do
+      return @deploy_paths if @deploy_paths
       FileUtils.mkdir_p(TorqueSpec.knob_root) unless File.exist?(TorqueSpec.knob_root)
+      descriptors << block.call if block
       i = descriptors.size > 1 ? 0 : nil
-      descriptors.map do |descriptor| 
+      @deploy_paths = descriptors.map do |descriptor| 
         DeploymentDescriptor.new(descriptor, "#{self.display_name}#{i&&i-=1}").path
       end
     end

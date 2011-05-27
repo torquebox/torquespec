@@ -5,7 +5,7 @@ TorqueSpec.lazy = false
 
 describe "simple knob deployment" do
   
-  deploy File.join( File.dirname(__FILE__), "../apps/simple.knob" )
+  deploy { File.join( File.dirname(__FILE__), "../apps/simple.knob" ) }
 
   it "should greet the world" do
     response = open("http://localhost:8080") {|f| f.read}
