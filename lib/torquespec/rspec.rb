@@ -18,7 +18,6 @@ end
 if ENV['TORQUEBOX_APP_NAME']
   module TorqueSpec
     def deploy(*descriptors)
-      puts "JC: does nothing"
     end
   end
 else
@@ -59,16 +58,15 @@ module TorqueSpec
         class << group
           alias_method :original_run_examples, :run_examples
           def run_examples(reporter)
-            begin
-              DRb.start_service("druby://localhost:0")
-            rescue SocketError, Errno::EADDRNOTAVAIL
-              DRb.start_service("druby://:0")
-            end
+            DRb.start_service("druby://localhost:0")
             daemon = DRbObject.new_with_uri("druby://127.0.0.1:7772")
-            daemon.run( name, reporter.extend(DRbUndumped) )
-            puts "JC: self=#{self.name} superclass=#{superclass.name}"
-            DRb.stop_service
-            # original_run_examples(reporter)
+            begin
+              daemon.run( name, reporter )
+            rescue Exception
+              puts $!, $@
+            ensure
+              DRb.stop_service
+            end
           end
           def children
             []                  # we have no nested groups locally, only remotely
