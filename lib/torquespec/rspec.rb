@@ -49,30 +49,13 @@ else
   end
 end
 
-require 'drb'
+require 'torquespec/daemon'
+
 module TorqueSpec
   module ObjectExtensions
     def remote_describe(*args, &example_group_block)
       group = describe(*args, &example_group_block)
-      unless ENV['TORQUEBOX_APP_NAME']
-        class << group
-          def run_examples(reporter)
-            DRb.start_service("druby://127.0.0.1:0")
-            daemon = DRbObject.new_with_uri("druby://127.0.0.1:7772")
-            begin
-              daemon.run( name, reporter )
-            rescue Exception
-              puts $!, $@
-            ensure
-              DRb.stop_service
-            end
-          end
-          def children
-            []                  # we have no nested groups locally, only remotely
-          end
-        end
-      end
-      group
+      ENV['TORQUEBOX_APP_NAME'] ? group : group.extend( TorqueSpec::Daemon::Client )
     end
   end
 end

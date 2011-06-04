@@ -4,12 +4,9 @@ require 'drb'
 module TorqueSpec
   class Daemon
 
-    PORT = 7772
-
     def initialize(opts={})
       puts "JC: create daemon opts=#{opts}"
       @argv = opts['argv'].to_a
-      @port = opts['port'] || PORT
 
       @options = RSpec::Core::ConfigurationOptions.new(@argv)
       @options.parse_options
@@ -25,7 +22,7 @@ module TorqueSpec
 
     def start
       puts "JC: start daemon"
-      DRb.start_service("druby://127.0.0.1:#{@port}", self)
+      DRb.start_service("druby://127.0.0.1:#{TorqueSpec.drb_port}", self)
     end
 
     def stop
@@ -38,6 +35,26 @@ module TorqueSpec
       example_group = @world.example_groups.find { |g| g.name == name }
       puts "JC: found #{example_group}"
       example_group.run( reporter )
+    end
+
+    # Intended to extend an RSpec::Core::ExampleGroup
+    module Client
+      # Delegate all examples (and nested groups) to remote daemon
+      def run_examples(reporter)
+        DRb.start_service("druby://127.0.0.1:0")
+        daemon = DRbObject.new_with_uri("druby://127.0.0.1:#{TorqueSpec.drb_port}")
+        begin
+          daemon.run( name, reporter )
+        rescue Exception
+          puts $!, $@
+        ensure
+          DRb.stop_service
+        end
+      end
+      # We have no nested groups locally, only remotely
+      def children
+        []
+      end
     end
   end
 end
