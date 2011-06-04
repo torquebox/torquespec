@@ -1,5 +1,3 @@
-require 'torquespec/server'
-
 begin
   # RSpec v2
   require 'rspec'
@@ -21,6 +19,8 @@ if ENV['TORQUEBOX_APP_NAME']
     end
   end
 else
+  require 'torquespec/server'
+
   TorqueSpec::Configurator.configure do |config|
     config.before(:suite) do
       Thread.current[:app_server] = TorqueSpec::Server.new
@@ -56,9 +56,8 @@ module TorqueSpec
       group = describe(*args, &example_group_block)
       unless ENV['TORQUEBOX_APP_NAME']
         class << group
-          alias_method :original_run_examples, :run_examples
           def run_examples(reporter)
-            DRb.start_service("druby://localhost:0")
+            DRb.start_service("druby://127.0.0.1:0")
             daemon = DRbObject.new_with_uri("druby://127.0.0.1:7772")
             begin
               daemon.run( name, reporter )
@@ -84,6 +83,6 @@ end
 
 module TorqueSpec
   def self.rubylib
-    Dir.glob(File.expand_path(File.join(File.dirname(__FILE__), "../../..", "*{spec,json,diff-lcs}*/lib"))).join(":")
+    Dir.glob(File.expand_path(File.join(File.dirname(__FILE__), "../../..", "*{spec,diff-lcs}*/lib"))).join(":")
   end
 end

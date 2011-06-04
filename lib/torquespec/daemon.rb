@@ -7,6 +7,7 @@ module TorqueSpec
     PORT = 7772
 
     def initialize(opts={})
+      puts "JC: create daemon opts=#{opts}"
       @argv = opts['argv'].to_a
       @port = opts['port'] || PORT
 
@@ -23,10 +24,12 @@ module TorqueSpec
     end
 
     def start
+      puts "JC: start daemon"
       DRb.start_service("druby://127.0.0.1:#{@port}", self)
     end
 
     def stop
+      puts "JC: stop daemon"
       DRb.stop_service
     end
 
