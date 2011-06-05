@@ -31,9 +31,8 @@ module TorqueSpec
     end
 
     def run(name, reporter)
-      puts "JC: testing #{name}"
+      puts "JC: run #{name}"
       example_group = @world.example_groups.find { |g| g.name == name }
-      puts "JC: found #{example_group}"
       example_group.run( reporter )
     end
 
@@ -56,5 +55,21 @@ module TorqueSpec
         []
       end
     end
+  end
+end
+
+# We don't actually serialize Proc objects, but we prevent a TypeError
+# when an object containing a Proc is serialized, e.g. when an Example
+# is passed to a remote Reporter.  This works for us because the
+# Reporter doesn't use the Example's Proc objects.
+class Proc
+  def marshal_dump
+  end
+  def marshal_load *args
+  end
+  def _dump *args
+  end
+  def self._load *args
+    new {}
   end
 end
