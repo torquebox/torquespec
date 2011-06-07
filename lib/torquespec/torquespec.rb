@@ -33,6 +33,10 @@ module TorqueSpec
   def self.rubylib
     Dir.glob(File.expand_path(File.join(File.dirname(__FILE__), "../../..", "*{spec,diff-lcs}*/lib"))).join(":")
   end
+  # The way client-side specs are passed to the daemon
+  def self.specs
+    RSpec::configuration.files_to_run.map {|f| File.expand_path(f) }.inspect
+  end
 end
 
 # Default TorqueSpec options

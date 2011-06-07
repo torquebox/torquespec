@@ -1,6 +1,6 @@
+require 'torquespec'
 require 'rspec/core'
 require 'drb'
-require 'torquespec/torquespec'
 
 module TorqueSpec
   class Daemon
