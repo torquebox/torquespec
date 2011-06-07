@@ -63,9 +63,3 @@ end
 class Object
   include TorqueSpec::ObjectExtensions
 end
-
-module TorqueSpec
-  def self.rubylib
-    Dir.glob(File.expand_path(File.join(File.dirname(__FILE__), "../../..", "*{spec,diff-lcs}*/lib"))).join(":")
-  end
-end

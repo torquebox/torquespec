@@ -29,6 +29,10 @@ module TorqueSpec
     end
   end
 
+  # A somewhat hackish way of exposing client-side gems to the server-side daemon
+  def self.rubylib
+    Dir.glob(File.expand_path(File.join(File.dirname(__FILE__), "../../..", "*{spec,diff-lcs}*/lib"))).join(":")
+  end
 end
 
 # Default TorqueSpec options
