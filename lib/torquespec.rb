@@ -1,2 +1,2 @@
 require 'torquespec/torquespec'
-require 'torquespec/rspec'
+require 'rspec/core/torquespec-extensions'
