@@ -30,11 +30,11 @@ module TorqueSpec
   end
 
   # A somewhat hackish way of exposing client-side gems to the server-side daemon
-  #
-  # TODO: Fix it so I don't include old versions of TorqueSpec
-  #
   def self.rubylib
-    Dir.glob(File.expand_path(File.join(File.dirname(__FILE__), "../../..", "*{spec,diff-lcs}*/lib"))).join(":")
+    here = File.dirname(__FILE__)
+    rspec_libs = Dir.glob(File.expand_path(File.join(here, "../../..", "*{rspec,diff-lcs}*/lib")))
+    this_lib = File.expand_path(File.join(here, ".."))
+    rspec_libs.unshift( this_lib ).join(":")
   end
 
   # The way client-side specs are passed to the daemon 
