@@ -20,5 +20,15 @@ remote_describe "in-container tests" do
     queue.stop
   end
 
+  context "nested example group" do
+    it "should work" do
+      true.should be_true
+    end
+
+    it "should also work" do
+      false.should be_false
+    end
+  end
+
 end
 

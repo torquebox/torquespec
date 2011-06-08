@@ -39,10 +39,21 @@ module TorqueSpec
 
     # Intended to extend an RSpec::Core::ExampleGroup
     module Client
+
+      def run(reporter)
+        begin
+          eval_before_alls(new)
+          run_remotely(reporter)
+        ensure
+          eval_after_alls(new)
+        end
+      end
+
       # Delegate all examples (and nested groups) to remote daemon
-      def run_examples(reporter)
+      def run_remotely(reporter)
         DRb.start_service("druby://127.0.0.1:0")
         daemon = DRbObject.new_with_uri("druby://127.0.0.1:#{TorqueSpec.drb_port}")
+        # TODO: maybe fall back to local if can't run?
         begin
           daemon.run( name, reporter )
         rescue Exception
@@ -51,9 +62,19 @@ module TorqueSpec
           DRb.stop_service
         end
       end
-      # We have no nested groups locally, only remotely
-      def children
-        []
+
+    end
+  end
+end
+
+module RSpec
+  module Core
+    class Example
+      def marshal_dump
+        @metadata
+      end
+      def marshal_load metadata
+        @metadata = metadata
       end
     end
   end
@@ -67,10 +88,5 @@ class Proc
   def marshal_dump
   end
   def marshal_load *args
-  end
-  def _dump *args
-  end
-  def self._load *args
-    new {}
   end
 end

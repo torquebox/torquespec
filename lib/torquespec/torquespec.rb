@@ -30,10 +30,20 @@ module TorqueSpec
   end
 
   # A somewhat hackish way of exposing client-side gems to the server-side daemon
+  #
+  # TODO: Fix it so I don't include old versions of TorqueSpec
+  #
   def self.rubylib
     Dir.glob(File.expand_path(File.join(File.dirname(__FILE__), "../../..", "*{spec,diff-lcs}*/lib"))).join(":")
   end
-  # The way client-side specs are passed to the daemon
+
+  # The way client-side specs are passed to the daemon 
+  #
+  # TODO: This won't work because we need to pass ARGV to the daemon,
+  # and we can't just map its items to their expanded path, e.g. -l
+  # 42, so we must pass (ARGV || spec) and Dir.pwd so that the daemon
+  # may initialize itself within that directory.
+  #
   def self.specs
     RSpec::configuration.files_to_run.map {|f| File.expand_path(f) }.inspect
   end
