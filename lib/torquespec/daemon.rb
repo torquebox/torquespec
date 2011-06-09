@@ -6,19 +6,21 @@ module TorqueSpec
   class Daemon
 
     def initialize(opts={})
-      puts "JC: create daemon opts=#{opts}"
-      @argv = opts['argv'].to_a
+      puts "JC: create daemon opts=#{opts.inspect}"
+      dir = opts['pwd'].to_s
+      raise "The 'pwd' option must contain a valid directory name" unless dir.any? && File.exist?(dir)
+      Dir.chdir( dir ) do
+        @options = RSpec::Core::ConfigurationOptions.new( opts['argv'].to_a )
+        @options.parse_options
 
-      @options = RSpec::Core::ConfigurationOptions.new(@argv)
-      @options.parse_options
+        @configuration = RSpec::configuration
+        @world         = RSpec::world
 
-      @configuration = RSpec::configuration
-      @world         = RSpec::world
-
-      @options.configure(@configuration)
-      @configuration.load_spec_files
-      @configuration.configure_mock_framework
-      @configuration.configure_expectation_framework
+        @options.configure(@configuration)
+        @configuration.load_spec_files
+        @configuration.configure_mock_framework
+        @configuration.configure_expectation_framework
+      end
     end
 
     def start

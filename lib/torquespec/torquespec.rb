@@ -37,15 +37,9 @@ module TorqueSpec
     rspec_libs.unshift( this_lib ).join(":")
   end
 
-  # The way client-side specs are passed to the daemon 
-  #
-  # TODO: This won't work because we need to pass ARGV to the daemon,
-  # and we can't just map its items to their expanded path, e.g. -l
-  # 42, so we must pass (ARGV || spec) and Dir.pwd so that the daemon
-  # may initialize itself within that directory.
-  #
-  def self.specs
-    RSpec::configuration.files_to_run.map {|f| File.expand_path(f) }.inspect
+  # We must initialize the daemon with the same params as passed to the client
+  def self.argv
+    ( ARGV.empty? ? [ 'spec' ] : ARGV ).inspect
   end
 end
 

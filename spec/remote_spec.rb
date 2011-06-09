@@ -7,7 +7,8 @@ remote_describe "in-container tests" do
       root: #{File.dirname(__FILE__)}/../apps/simple
     services:
       TorqueSpec::Daemon:
-        argv: #{ARGV.map{|x|File.expand_path(x)}.inspect}
+        argv: #{TorqueSpec.argv}
+        pwd: #{Dir.pwd}
     environment:
       RUBYLIB: #{TorqueSpec.rubylib}
   END
