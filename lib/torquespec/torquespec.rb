@@ -11,7 +11,10 @@ module TorqueSpec
       descriptors << block.call if block
       i = descriptors.size > 1 ? 0 : nil
       @deploy_paths = descriptors.map do |descriptor| 
-        DeploymentDescriptor.new(descriptor, "#{self.display_name}#{i&&i-=1}").path
+        DeploymentDescriptor.new(descriptor, 
+                                 "#{self.display_name}#{i&&i-=1}", 
+                                 self.is_a?(TorqueSpec::Daemon::Client)
+                                 ).path
       end
     end
   end
@@ -39,7 +42,7 @@ module TorqueSpec
 
   # We must initialize the daemon with the same params as passed to the client
   def self.argv
-    ( ARGV.empty? ? [ 'spec' ] : ARGV ).inspect
+    ( ARGV.empty? ? [ 'spec' ] : ARGV )
   end
 end
 

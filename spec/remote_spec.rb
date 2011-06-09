@@ -5,12 +5,6 @@ remote_describe "in-container tests" do
   deploy <<-END.gsub(/^ {4}/,'')
     application:
       root: #{File.dirname(__FILE__)}/../apps/simple
-    services:
-      TorqueSpec::Daemon:
-        argv: #{TorqueSpec.argv}
-        pwd: #{Dir.pwd}
-    environment:
-      RUBYLIB: #{TorqueSpec.rubylib}
   END
 
   it "should work" do

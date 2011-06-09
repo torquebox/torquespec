@@ -28,19 +28,15 @@ else
     end
     
     config.before(:all) do
-      if self.class.respond_to?( :deploy_paths )
-        self.class.deploy_paths.each do |path|
-          Thread.current[:app_server].deploy(path)
-        end
-      end
+      self.class.deploy_paths.each do |path|
+        Thread.current[:app_server].deploy(path)
+      end if self.class.respond_to?( :deploy_paths )
     end
 
     config.after(:all) do
-      if self.class.respond_to?( :deploy_paths )
-        self.class.deploy_paths.each do |path|
-          Thread.current[:app_server].undeploy(path)
-        end
-      end
+      self.class.deploy_paths.each do |path|
+        Thread.current[:app_server].undeploy(path)
+      end if self.class.respond_to?( :deploy_paths )
     end
 
     config.after(:suite) do
