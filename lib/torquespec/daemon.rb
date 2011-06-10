@@ -65,11 +65,29 @@ module TorqueSpec
           DRb.stop_service
         end
       end
+      
+      def deploy_paths
+        descriptor = <<-END.gsub(/^ {10}/,'')
+          application:
+            root: #{TorqueSpec.app_root}
+          ruby:
+            version: #{RUBY_VERSION[0,3]}
+          services:
+            TorqueSpec::Daemon:
+              argv: #{TorqueSpec.argv}
+              pwd:  #{Dir.pwd}
+          environment:
+            RUBYLIB: #{TorqueSpec.rubylib}
+        END
+        [ DeploymentDescriptor.new(descriptor, display_name).path ]
+      end
 
     end
   end
 end
 
+# Reporters really only care about metadata, which is good since not
+# much else is serializable.
 module RSpec
   module Core
     class Example
@@ -91,5 +109,20 @@ class Proc
   def marshal_dump
   end
   def marshal_load *args
+  end
+end
+
+# We want any Java exceptions tossed on the server to be passed back
+# to the Reporter on the client, and NativeExceptions have no
+# allocator, hence they're not marshalable.
+class NativeException
+  def _dump(*)
+    Marshal.dump( [cause, backtrace] )
+  end
+  def self._load(str)
+    exception, trace = Marshal.load(str)
+    meta = class << exception; self; end
+    meta.send(:define_method, :backtrace) { trace }
+    exception
   end
 end

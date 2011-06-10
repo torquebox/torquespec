@@ -9,6 +9,7 @@ module TorqueSpec
       @descriptor = descriptor
       @path = Pathname.new( name.gsub(/\W/,'_') + "-knob.yml" ).expand_path( TorqueSpec.knob_root )
       @daemonify = daemonify
+      FileUtils.mkdir_p(TorqueSpec.knob_root) unless File.exist?(TorqueSpec.knob_root)
     end
     def path
       daemonify( hash || filename || heredoc )

@@ -7,7 +7,6 @@ module TorqueSpec
     metaclass = class << self; self; end
     metaclass.send(:define_method, :deploy_paths) do
       return @deploy_paths if @deploy_paths
-      FileUtils.mkdir_p(TorqueSpec.knob_root) unless File.exist?(TorqueSpec.knob_root)
       descriptors << block.call if block
       i = descriptors.size > 1 ? 0 : nil
       @deploy_paths = descriptors.map do |descriptor| 
@@ -44,6 +43,12 @@ module TorqueSpec
   def self.argv
     ( ARGV.empty? ? [ 'spec' ] : ARGV )
   end
+
+  # The location of an empty app used for deploying the daemon
+  def self.app_root
+    File.expand_path( File.join( File.dirname(__FILE__), "../..", "apps", "empty" ) )
+  end
+
 end
 
 # Default TorqueSpec options

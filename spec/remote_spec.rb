@@ -1,4 +1,5 @@
 require 'torquespec'
+require 'open-uri'
 
 remote_describe "in-container tests" do
 
@@ -6,6 +7,11 @@ remote_describe "in-container tests" do
     application:
       root: #{File.dirname(__FILE__)}/../apps/simple
   END
+
+  it "should still greet the world" do
+    response = open("http://localhost:8080") {|f| f.read}
+    response.strip.should == "Hello World!"
+  end
 
   it "should work" do
     require 'torquebox/messaging/queue'
