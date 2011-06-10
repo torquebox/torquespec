@@ -49,6 +49,21 @@ module TorqueSpec
     File.expand_path( File.join( File.dirname(__FILE__), "../..", "apps", "empty" ) )
   end
 
+  # Whether we're running locally or in the daemon
+  def self.remote?
+    !!ENV['TORQUEBOX_APP_NAME']
+  end
+  
+  # Guard those things you only want to do in the container
+  def self.remote
+    yield if remote?
+  end
+  
+  # Guard those things you only want done locally
+  def self.local
+    yield unless remote?
+  end
+
 end
 
 # Default TorqueSpec options
