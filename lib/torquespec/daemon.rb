@@ -27,6 +27,13 @@ module TorqueSpec
     def start
       puts "JC: start daemon"
       DRb.start_service("druby://127.0.0.1:#{TorqueSpec.drb_port}", self)
+      10.times do
+        if DRb.current_server
+          break
+        else
+          sleep(0.1)
+        end
+      end
     end
 
     def stop
@@ -47,6 +54,8 @@ module TorqueSpec
         begin
           eval_before_alls(new)
           run_remotely(reporter)
+        rescue Exception => ex
+          fail_filtered_examples(ex, reporter)
         ensure
           eval_after_alls(new)
         end
@@ -56,30 +65,15 @@ module TorqueSpec
       def run_remotely(reporter)
         DRb.start_service("druby://127.0.0.1:0")
         daemon = DRbObject.new_with_uri("druby://127.0.0.1:#{TorqueSpec.drb_port}")
-        # TODO: maybe fall back to local if can't run?
         begin
           daemon.run( name, reporter )
-        rescue Exception
-          puts $!, $@
         ensure
           DRb.stop_service
         end
       end
       
       def deploy_paths
-        descriptor = <<-END.gsub(/^ {10}/,'')
-          application:
-            root: #{TorqueSpec.app_root}
-          ruby:
-            version: #{RUBY_VERSION[0,3]}
-          services:
-            TorqueSpec::Daemon:
-              argv: #{TorqueSpec.argv}
-              pwd:  #{Dir.pwd}
-          environment:
-            RUBYLIB: #{TorqueSpec.rubylib}
-        END
-        [ DeploymentDescriptor.new(descriptor, display_name).path ]
+        [ DeploymentDescriptor.new({}, display_name, true).path ]
       end
 
     end

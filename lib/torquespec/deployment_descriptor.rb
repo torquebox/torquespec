@@ -12,7 +12,7 @@ module TorqueSpec
       FileUtils.mkdir_p(TorqueSpec.knob_root) unless File.exist?(TorqueSpec.knob_root)
     end
     def path
-      daemonify( hash || filename || heredoc )
+      verify( hash || filename || heredoc )
     end
     def hash
       if @descriptor.is_a? Hash
@@ -38,21 +38,28 @@ module TorqueSpec
       x.is_a?(Hash) ? x.inject({}) {|h,(k,v)| h[k.to_s] = stringify_keys(v); h} : x
     end
 
-    def daemonify( path )
-      if @daemonify
-        yaml = YAML.load_file( path )
-        if yaml.is_a? Hash
+    def verify( path )
+      original = YAML.load_file( path )
+      if original.is_a? Hash
+        yaml = original.dup
+        if @daemonify
+          yaml['application'] ||= {}
+          yaml['application']['root'] ||= TorqueSpec.app_root
           yaml['services'] ||= {}
           yaml['services'].update( 'TorqueSpec::Daemon' => { 'argv' => TorqueSpec.argv, 'pwd' => Dir.pwd } )
           yaml['environment'] ||= {}
           env = { 'RUBYLIB' => TorqueSpec.rubylib }
           yaml['environment'].update(env) {|k,oldval,newval| "#{oldval}:#{newval}"}
+        end
+        yaml['ruby'] ||= {}
+        yaml['ruby']['version'] ||= RUBY_VERSION[0,3]
+        if original != yaml
           File.open( path, 'w' ) do |file|
             YAML.dump( yaml, file )
           end
-        else
-          $stderr.puts "WARN: Unable to decorate your deployment descriptor with TorqueSpec::Daemon"
         end
+      else
+        $stderr.puts "WARN: Unable to decorate your deployment descriptor with TorqueSpec::Daemon"
       end
       path
     end
