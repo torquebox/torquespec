@@ -1,4 +1,4 @@
-#+TITLE:     README.org
+#+TITLE:     Integration Testing for TorqueBox
 #+AUTHOR:    Jim Crossley
 #+EMAIL:     jcrossley@redhat.com
 #+DATE:      2011-06-11 Sat
@@ -24,16 +24,16 @@
 
 ** RSpec extensions
 
-   TorqueSpec makes two new methods available to your RSpec examples:
+   TorqueSpec makes two new methods available to your spec files:
    =deploy= and =remote_describe=.
 
-*** The =deploy()= method
+*** =deploy()=
 
     Called from within a =describe= block, it is via this method that
     your app is deployed to TorqueBox before running your examples and
     undeployed thereafter.
 
-*** The =remote_describe()= method
+*** =remote_describe()=
 
     TorqueSpec provides "in container" testing via the
     =remote_describe= method.  It behaves exactly like the RSpec

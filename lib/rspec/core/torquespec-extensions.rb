@@ -13,12 +13,15 @@ TorqueSpec::Configurator.configure do |config|
   config.extend(TorqueSpec)
 end
 
-if ENV['TORQUEBOX_APP_NAME']
+TorqueSpec.remote {
   module TorqueSpec
     def deploy(*descriptors)
     end
   end
-else
+}
+
+TorqueSpec.local {
+
   require 'torquespec/server'
 
   TorqueSpec::Configurator.configure do |config|
@@ -43,7 +46,7 @@ else
       Thread.current[:app_server].stop
     end
   end
-end
+}
 
 require 'torquespec/daemon'
 
@@ -51,7 +54,7 @@ module TorqueSpec
   module ObjectExtensions
     def remote_describe(*args, &example_group_block)
       group = describe(*args, &example_group_block)
-      ENV['TORQUEBOX_APP_NAME'] ? group : group.extend( TorqueSpec::Daemon::Client )
+      TorqueSpec.remote? ? group : group.extend( TorqueSpec::Daemon::Client )
     end
   end
 end
