@@ -16,7 +16,7 @@
 * TorqueSpec 
   
   TorqueSpec provides integration testing for applications designed to
-  run on the [[http://torquebox.org][TorqueBox Ruby application server]].  It also extends the
+  run on the [[http://torquebox.org/][TorqueBox Ruby application server]].  It also extends the
   [[http://relishapp.com/rspec][RSpec testing framework]] with two new commands: one for deploying
   your application to a TorqueSpec-managed TorqueBox server, and
   another to run a group of examples within that TorqueBox server,
