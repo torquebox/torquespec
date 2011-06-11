@@ -1,6 +1,9 @@
 require 'torquespec'
 require 'open-uri'
 
+require 'jruby'
+JRuby.objectspace = true
+
 remote_describe "in-container tests" do
 
   deploy <<-END.gsub(/^ {4}/,'')

@@ -58,9 +58,9 @@ module TorqueSpec
             YAML.dump( yaml, file )
           end
         end
-      else
-        $stderr.puts "WARN: Unable to decorate your deployment descriptor with TorqueSpec::Daemon"
       end
+      path
+    rescue Exception
       path
     end
   end
