@@ -1,0 +1,52 @@
+#+TITLE:     README.org
+#+AUTHOR:    Jim Crossley
+#+EMAIL:     jcrossley@redhat.com
+#+DATE:      2011-06-11 Sat
+#+DESCRIPTION: 
+#+KEYWORDS: 
+#+LANGUAGE:  en
+#+OPTIONS:   H:3 num:t toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:nil skip:nil d:nil todo:t pri:nil tags:not-in-toc
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+LINK_UP:   
+#+LINK_HOME: 
+
+* TorqueSpec 
+  
+  TorqueSpec provides integration testing for applications designed to
+  run on the [[http://torquebox.org][TorqueBox Ruby application server]].  It also extends the
+  [[http://relishapp.com/rspec][RSpec testing framework]] with two new commands: one for deploying
+  your application to a TorqueSpec-managed TorqueBox server, and
+  another to run a group of examples within that TorqueBox server,
+  i.e. "in-container" testing.
+
+** RSpec extensions
+
+   TorqueSpec makes two new methods available to your RSpec examples:
+   =deploy= and =remote_describe=.
+
+*** The =deploy()= method
+
+    Called from within a =describe= block, it is via this method that
+    your app is deployed to TorqueBox before running your examples and
+    undeployed thereafter.
+
+*** The =remote_describe()= method
+
+    TorqueSpec provides "in container" testing via the
+    =remote_describe= method.  It behaves exactly like the RSpec
+    =describe= method, but the resulting =ExampleGroup= will be run
+    inside the TorqueBox server.
+
+** Configuration 
+
+   TODO
+
+** Dependencies
+
+   TorqueSpec has been extensively tested with RSpec 2, though RSpec 1
+   should be compatible as well.  But really, why are you still using
+   RSpec 1?
+
