@@ -6,7 +6,7 @@ module TorqueSpec
   class Daemon
 
     def initialize(opts={})
-      puts "JC: create daemon opts=#{opts.inspect}"
+      puts "daemon: create opts=#{opts.inspect}"
       dir = opts['pwd'].to_s
       raise "The 'pwd' option must contain a valid directory name" if dir.empty? || !File.exist?(dir)
       Dir.chdir( dir ) do
@@ -25,24 +25,17 @@ module TorqueSpec
     end
 
     def start
-      puts "JC: start daemon"
+      puts "daemon: start"
       DRb.start_service("druby://127.0.0.1:#{TorqueSpec.drb_port}", self)
-      10.times do
-        if DRb.current_server
-          break
-        else
-          sleep(0.1)
-        end
-      end
     end
 
     def stop
-      puts "JC: stop daemon"
+      puts "daemon: stop"
       DRb.stop_service
     end
 
     def run(name, reporter)
-      puts "JC: run #{name}"
+      puts "daemon: run #{name}"
       example_group = @world.example_groups.find { |g| g.name == name }
       example_group.run( reporter )
     end
@@ -65,15 +58,21 @@ module TorqueSpec
       def run_remotely(reporter)
         DRb.start_service("druby://127.0.0.1:0")
         daemon = DRbObject.new_with_uri("druby://127.0.0.1:#{TorqueSpec.drb_port}")
+        attempts = 10
         begin
           daemon.run( name, reporter )
+        rescue DRb::DRbConnError
+          # Overcome DRb.start_service() race condition
+          raise unless (attempts-=1) > 0
+          sleep(0.2)
+          retry
         ensure
           DRb.stop_service
         end
       end
       
       def deploy_paths
-        [ DeploymentDescriptor.new({}, display_name, true).path ]
+        [ DeploymentDescriptor.new( {}, display_name, true ).path ]
       end
 
     end
