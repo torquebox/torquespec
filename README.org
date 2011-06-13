@@ -36,7 +36,7 @@
    TorqueSpec makes two new methods available to your spec files:
    =deploy= and =remote_describe=.
 
-*** The =deploy()= method
+*** deploy()
 
     Determines which app[s] are deployed prior to running a particular
     =ExampleGroup=, so typically called from a top-level =describe=
@@ -74,7 +74,7 @@
     e.g. =__FILE__=.  And the little =gsub(/^ {4},'')= trick allows
     you to indent the YAML relative to the Ruby.
 
-*** The =remote_describe()= method
+*** remote_describe()
 
     TorqueSpec supports "in container" testing via the
     =remote_describe= method.  It behaves exactly like the RSpec
