@@ -36,7 +36,7 @@
    TorqueSpec makes two new methods available to your spec files:
    =deploy= and =remote_describe=.
 
-*** =deploy()=
+*** The =deploy()= method
 
     Determines which app[s] are deployed prior to running a particular
     =ExampleGroup=, so typically called from a top-level =describe=
@@ -70,11 +70,11 @@
 
     Here docs are especially nice because they support string
     substitution.  Note that we're setting the location of the app
-    relative to the location of the spec file, itself,
+    relative to the location of the spec file itself,
     e.g. =__FILE__=.  And the little =gsub(/^ {4},'')= trick allows
     you to indent the YAML relative to the Ruby.
 
-*** =remote_describe()=
+*** The =remote_describe()= method
 
     TorqueSpec supports "in container" testing via the
     =remote_describe= method.  It behaves exactly like the RSpec
@@ -94,36 +94,34 @@
     you must ensure that any gems other than TorqueSpec/RSpec are
     available to the process that needs them.
 
-    #+BEGIN_SRC ruby
-    require 'torquespec'
-    
-    TorqueSpec.local {
-      require 'capybara'
-    }
-    
-    app = <<-END.gsub(/^ {4}/,'')
-        application:
-          root: #{File.dirname(__FILE__)}/../app
-        END
-    
-    describe "local test" do
-      deploy(app)
-    
-      it "should work" do
-        visit "/"
-        page.should have_content('it worked')
-      end
-    end
-    
-    remote_describe "remote test" do
-      deploy(app)
-    
-      it "should work" do
-        some_service = inject(com.foo.SomeService)
-        some_service.run.should == 'SUCCESS'
-      end
-    end
-    #+END_SRC
+    : require 'torquespec'
+    : 
+    : TorqueSpec.local {
+    :   require 'capybara'
+    : }
+    : 
+    : app = <<-END.gsub(/^ {4}/,'')
+    :     application:
+    :       root: #{File.dirname(__FILE__)}/../app
+    :     END
+    : 
+    : describe "local test" do
+    :   deploy(app)
+    : 
+    :   it "should work" do
+    :     visit "/"
+    :     page.should have_content('it worked')
+    :   end
+    : end
+    : 
+    : remote_describe "remote test" do
+    :   deploy(app)
+    : 
+    :   it "should work" do
+    :     some_service = inject(com.foo.SomeService)
+    :     some_service.run.should == 'SUCCESS'
+    :   end
+    : end
     
     The above spec shows two example groups, one local and one remote.
     But this spec will be processed by both the local test runner and
