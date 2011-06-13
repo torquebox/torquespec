@@ -7,7 +7,7 @@ module TorqueSpec
     metaclass = class << self; self; end
     metaclass.send(:define_method, :deploy_paths) do
       return @deploy_paths if @deploy_paths
-      descriptors << block.call if block
+      descriptors += [block.call].flatten if block
       i = descriptors.size > 1 ? 0 : nil
       @deploy_paths = descriptors.map do |descriptor| 
         DeploymentDescriptor.new(descriptor, 
