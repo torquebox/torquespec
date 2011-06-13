@@ -94,7 +94,7 @@
     you must ensure that any gems other than TorqueSpec/RSpec are
     available to the process that needs them.
 
-    #+BEGIN_SRC ruby -n
+    #+BEGIN_SRC ruby
     require 'torquespec'
     
     TorqueSpec.local {
