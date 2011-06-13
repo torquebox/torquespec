@@ -1,26 +1,35 @@
 #+TITLE:     Integration Testing for TorqueBox
 #+AUTHOR:    Jim Crossley
 #+EMAIL:     jcrossley@redhat.com
-#+DATE:      2011-06-11 Sat
-#+DESCRIPTION: 
-#+KEYWORDS: 
 #+LANGUAGE:  en
 #+OPTIONS:   H:3 num:nil toc:nil \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
 #+OPTIONS:   TeX:t LaTeX:nil skip:nil d:nil todo:t pri:nil tags:not-in-toc
 #+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
 #+EXPORT_SELECT_TAGS: export
 #+EXPORT_EXCLUDE_TAGS: noexport
-#+LINK_UP:   
-#+LINK_HOME: 
 
 * TorqueSpec 
   
-  TorqueSpec provides integration testing for applications designed to
-  run on the [[http://torquebox.org/][TorqueBox Ruby application server]].  It also extends the
-  [[http://relishapp.com/rspec][RSpec testing framework]] with two new commands: one for deploying
-  your application to a TorqueSpec-managed TorqueBox server, and
-  another to run a group of examples within that TorqueBox server,
-  i.e. "in-container" testing.
+  TorqueSpec extends the [[http://relishapp.com/rspec][RSpec testing framework]] to provide
+  integration testing for applications designed to run on the
+  [[http://torquebox.org/][TorqueBox Ruby application server]].  
+
+  Easy browser control/simulation is possible via the [[https://github.com/jnicklas/capybara][capybara]] or
+  [[https://github.com/brynary/webrat][webrat]] gems, of course, but TorqueSpec also provides "in-container"
+  testing, where your examples are actually run within the TorqueBox
+  server itself.
+
+** Installation
+
+   Install the torquespec gem:
+
+   : $ gem install torquespec
+
+   And then require 'torquespec' in your spec files (or indirectly via
+   =spec_helper.rb=).  Doing this will cause TorqueSpec to add a
+   "before suite" hook that fires up a TorqueBox server, i.e. JBoss,
+   prior to running your specs and an "after suite" hook to shut it
+   down.
 
 ** RSpec extensions
 
@@ -29,20 +38,128 @@
 
 *** =deploy()=
 
-    Called from within a =describe= block, it is via this method that
-    your app is deployed to TorqueBox before running your examples and
-    undeployed thereafter.
+    Determines which app[s] are deployed prior to running a particular
+    =ExampleGroup=, so typically called from a top-level =describe=
+    block.  The deployment and subsequent undeployment occur within
+    "before all" and "after all" RSpec hooks, respectively.
+
+    The method accepts any number of arguments, each of which should
+    represent a [[http://torquebox.org/2x/builds/html-docs/deployment-descriptors.html][TorqueBox deployment descriptor]], typically a YAML
+    "here document", a Hash, or a path to an existing file.  It also
+    accepts a block, the result of which should also be one or more
+    deployment descriptors.  Here's an example using a single here
+    doc:
+
+    : describe "basic test with heredoc" do
+    : 
+    :   deploy <<-DD_END.gsub(/^ {4}/,'')
+    :     application:
+    :       root: #{File.dirname(__FILE__)}/../app
+    :       env: development
+    :     web:
+    :       context: /basic
+    :   DD_END
+    : 
+    :   it "should work" do
+    :     visit "/basic"
+    :     page.should have_content('it worked')
+    :     page.find("#success")[:class].should == 'basic'
+    :   end
+    : 
+    : end
+
+    Here docs are especially nice because they support string
+    substitution.  Note that we're setting the location of the app
+    relative to the location of the spec file, itself,
+    e.g. =__FILE__=.  And the little =gsub(/^ {4},'')= trick allows
+    you to indent the YAML relative to the Ruby.
 
 *** =remote_describe()=
 
-    TorqueSpec provides "in container" testing via the
+    TorqueSpec supports "in container" testing via the
     =remote_describe= method.  It behaves exactly like the RSpec
     =describe= method, but the resulting =ExampleGroup= will be run
     inside the TorqueBox server.
 
+    If your spec calls =remote_describe=, TorqueSpec will deploy a
+    small daemon with your application.  This daemon will act as an
+    additional RSpec runner to which the "local" runner will delegate
+    the invocation of those =ExampleGroups= defined by
+    =remote_describe=.  This delegation occurs via DRb: the "remote"
+    runner reports its results to the "local" one, allowing you to
+    summarize the results of all your tests, both in-container and
+    out, in a single report.
+
+    Because your specs are consumed by two separate RSpec processes,
+    you must ensure that any gems other than TorqueSpec/RSpec are
+    available to the process that needs them.
+
+    #+BEGIN_SRC ruby -n
+    require 'torquespec'
+    
+    TorqueSpec.local {
+      require 'capybara'
+    }
+    
+    app = <<-END.gsub(/^ {4}/,'')
+        application:
+          root: #{File.dirname(__FILE__)}/../app
+        END
+    
+    describe "local test" do
+      deploy(app)
+    
+      it "should work" do
+        visit "/"
+        page.should have_content('it worked')
+      end
+    end
+    
+    remote_describe "remote test" do
+      deploy(app)
+    
+      it "should work" do
+        some_service = inject(com.foo.SomeService)
+        some_service.run.should == 'SUCCESS'
+      end
+    end
+    #+END_SRC
+    
+    The above spec shows two example groups, one local and one remote.
+    But this spec will be processed by both the local test runner and
+    the remote daemon.  The local one uses =capybara= so its require
+    is guarded in a =TorqueSpec.local= block, which won't be run
+    remotely.  There's a complementary =TorqueSpec.remote= method
+    available, too.
+
+    Note also that the remote example is injecting a service that
+    wouldn't be available in the local runtime, only in the remote
+    TorqueBox server.  Hence, the convenience, if not potential
+    confusion, of in-container testing. :)
+
 ** Configuration 
 
-   TODO
+   Configuration parameters are variables in the TorqueSpec namespace, e.g. =TorqueSpec.max_heap=.
+
+   | Parameter    | Description                                                    | Default       |
+   |--------------+----------------------------------------------------------------+---------------|
+   | ~knob_root~  | Where TorqueSpec creates your deployment descriptors           | .torquespec   |
+   | ~jboss_home~ | Where JBoss is installed                                       | ~$JBOSS_HOME~ |
+   | ~max_heap~   | The maximum RAM allocated to the JBoss JVM                     | 1024 MB       |
+   | ~jvm_args~   | Arguments to the JVM running JBoss                             | /see below/   |
+   | ~drb_port~   | The in-container spec runner listens on this port for requests | 7772          |
+   | ~lazy~       | Whether to use a running JBoss and leave it running when done  | false         |
+
+   By default, TorqueSpec is initialized thusly:
+
+   : TorqueSpec.configure do |config|
+   :   config.drb_port = 7772
+   :   config.knob_root = ".torquespec"
+   :   config.jboss_home = ENV['JBOSS_HOME']
+   :   config.jvm_args = "-Xms64m -Xmx1024m -XX:MaxPermSize=512m -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:+CMSClassUnloadingEnabled -Dgem.path=default"
+   : end
+
+   Include a similar block in your =spec_helper.rb= to customize any of these.
 
 ** Dependencies
 

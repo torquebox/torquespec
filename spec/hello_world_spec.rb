@@ -15,10 +15,10 @@ end
 
 describe "simple directory deployment" do
   
-  deploy <<-END.gsub(/^ {4}/,'')
+  deploy <<-DD_END.gsub(/^ {4}/,'')
     application:
       root: #{File.dirname(__FILE__)}/../apps/simple
-  END
+  DD_END
 
   it "should greet the world" do
     response = open("http://localhost:8080") {|f| f.read}
