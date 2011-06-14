@@ -29,6 +29,15 @@ module TorqueSpec
     def as7?
       File.exist?( File.join( jboss_home, "bin/standalone.sh" ) )
     end
+    def jboss_home
+      @jboss_home ||= ENV['JBOSS_HOME'] || jboss_home_from_server_gem
+    end
+    def jboss_home_from_server_gem
+      require 'torquebox-server'
+      TorqueBox::Server.jboss_home
+    rescue Exception
+      $stderr.puts "WARN: Unable to determine JBoss install location; set either TorqueSpec.jboss_home or ENV['JBOSS_HOME']"
+    end
   end
 
   # A somewhat hackish way of exposing client-side gems to the server-side daemon
@@ -70,7 +79,6 @@ end
 TorqueSpec.configure do |config|
   config.drb_port = 7772
   config.knob_root = ".torquespec"
-  config.jboss_home = ENV['JBOSS_HOME']
   config.jvm_args = "-Xms64m -Xmx1024m -XX:MaxPermSize=512m -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:+CMSClassUnloadingEnabled -Dgem.path=default"
 end
 

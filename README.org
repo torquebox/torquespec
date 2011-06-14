@@ -12,7 +12,10 @@
   
   TorqueSpec extends the [[http://relishapp.com/rspec][RSpec testing framework]] to provide
   integration testing for applications designed to run on the
-  [[http://torquebox.org/][TorqueBox Ruby application server]].  
+  [[http://torquebox.org/][TorqueBox Ruby application server]].  Before running your RSpec
+  examples, TorqueSpec ensures that a TorqueBox server is running and
+  enables you to verify expectations against real applications
+  deployed on it.
 
   Easy browser control/simulation is possible via the [[https://github.com/jnicklas/capybara][capybara]] or
   [[https://github.com/brynary/webrat][webrat]] gems, of course, but TorqueSpec also provides "in-container"
@@ -25,16 +28,18 @@
 
    : $ gem install torquespec
 
-   And then require 'torquespec' in your spec files (or indirectly via
-   =spec_helper.rb=).  Doing this will cause TorqueSpec to add a
-   "before suite" hook that fires up a TorqueBox server, i.e. JBoss,
-   prior to running your specs and an "after suite" hook to shut it
-   down.
+   And then in your spec files (or indirectly via =spec_helper.rb=):
+
+   : require 'torquespec'
+
+   Doing this will cause TorqueSpec to add a "before suite" hook that
+   fires up a TorqueBox server, i.e. JBoss, prior to running your
+   specs and an "after suite" hook to shut it down.
 
 ** RSpec extensions
 
-   TorqueSpec makes two new methods available to your spec files:
-   =deploy= and =remote_describe=.
+   Aiming to be minimally intrusive, TorqueSpec makes two new methods
+   available to your spec files: =deploy= and =remote_describe=.
 
 *** deploy()
 
@@ -153,7 +158,6 @@
    : TorqueSpec.configure do |config|
    :   config.drb_port = 7772
    :   config.knob_root = ".torquespec"
-   :   config.jboss_home = ENV['JBOSS_HOME']
    :   config.jvm_args = "-Xms64m -Xmx1024m -XX:MaxPermSize=512m -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:+CMSClassUnloadingEnabled -Dgem.path=default"
    : end
 
