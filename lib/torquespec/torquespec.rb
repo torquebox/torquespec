@@ -12,7 +12,7 @@ module TorqueSpec
       @deploy_paths = descriptors.map do |descriptor| 
         DeploymentDescriptor.new(descriptor, 
                                  "#{self.display_name}#{i&&i-=1}", 
-                                 self.is_a?(TorqueSpec::Daemon::Client)
+                                 descendants.any? {|x| x.is_a?(TorqueSpec::Daemon::Client)}
                                  ).path
       end
     end

@@ -34,9 +34,12 @@ module TorqueSpec
       DRb.stop_service
     end
 
-    def run(name, reporter)
-      puts "daemon: run #{name}"
-      example_group = @world.example_groups.find { |g| g.name == name }
+    def run(alien, reporter)
+      puts "daemon: run #{alien}"
+      simple_name = alien.name.split("::").last
+      example_group = @world.example_groups.inject([]) {|all,g| all + g.descendants}.find do |group| 
+        group.name.split("::").last == simple_name && group.description == alien.description
+      end
       example_group.run( reporter )
     end
 
@@ -60,7 +63,7 @@ module TorqueSpec
         daemon = DRbObject.new_with_uri("druby://127.0.0.1:#{TorqueSpec.drb_port}")
         attempts = 10
         begin
-          daemon.run( name, reporter )
+          daemon.run( self, reporter )
         rescue DRb::DRbConnError
           # Overcome DRb.start_service() race condition
           raise unless (attempts-=1) > 0
