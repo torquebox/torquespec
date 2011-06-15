@@ -100,6 +100,7 @@
     available to the process that needs them.
 
     : require 'torquespec'
+    : require 'torquebox-core'
     : 
     : TorqueSpec.local {
     :   require 'capybara'
@@ -120,6 +121,7 @@
     : end
     : 
     : remote_describe "remote test" do
+    :   include TorqueBox::Injectors
     :   deploy(app)
     : 
     :   it "should work" do
@@ -129,16 +131,67 @@
     : end
     
     The above spec shows two example groups, one local and one remote.
-    But this spec will be processed by both the local test runner and
-    the remote daemon.  The local one uses =capybara= so its require
-    is guarded in a =TorqueSpec.local= block, which won't be run
-    remotely.  There's a complementary =TorqueSpec.remote= method
-    available, too.
+    There are a few things to note:
+      - This spec will be processed by both the local test runner and
+        the remote daemon.
+      - The local example needs the =visit()= method and =page=
+        objects from =capybara= so its require statemtent is guarded
+        in a =TorqueSpec.local= block, which won't be run remotely,
+        since the =capybara= won't be available in the daemon's
+        runtime.  Similarly, put statements that should *only* run
+        remotely in a =TorqueSpec.remote= block.
+      - TorqueBox injection is supported in remote examples as long as
+        =TorqueBox::Injectors= is included in their group.
+      - Because the =remote_describe= block is evaluated locally (but
+        not executed), we must require 'torquebox-core' to refer to
+        =TorqueBox::Injectors= both locally and remotely, even though
+        the injection will only be performed remotely.
 
-    Note also that the remote example is injecting a service that
-    wouldn't be available in the local runtime, only in the remote
-    TorqueBox server.  Hence, the convenience, if not potential
-    confusion, of in-container testing. :)
+*** Nesting Example Groups
+
+    The above example is not very efficient because the same
+    application is being deployed twice: once for the local =describe=
+    and again for the =remote_describe=.  We can do better by taking
+    advantage of RSpec's support for nested groups:
+
+    : describe "outside the container" do
+    : 
+    :   before(:each) do
+    :     puts "runs both locally and remotely"
+    :   end
+    : 
+    :   deploy <<-END.gsub(/^ {4}/,'')
+    :     application:
+    :       root: #{File.dirname(__FILE__)}/../app
+    :   END
+    : 
+    :   it "should handle web requests" do
+    :     visit "/"
+    :   end
+    : 
+    :   remote_describe "inside the container" do
+    : 
+    :     before(:each) do
+    :       puts "runs only remotely"
+    :     end
+    : 
+    :     it "should handle injection" do
+    :       inject( 'service-registry' ).should_not be_nil
+    :     end
+    : 
+    :   end
+    : 
+    : end
+
+    Example groups may be arbitrarily nested, but remember that *ALL*
+    subgroups of a =remote_describe= will be executed remotely by the
+    TorqueSpec daemon.
+
+    Also note that =before= and =after= blocks should work as you
+    expect, but the fact that the parent's =before= block in the above
+    example will run remotely might mean you'll need to guard certain
+    statements in either a =TorqueSpec.local= or =TorqueSpec.remote=
+    block.
 
 ** Configuration 
 
