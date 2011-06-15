@@ -17,23 +17,29 @@ describe "out of the container" do
     response.strip.should == "Hello World!"
   end
 
+  def blocks
+    @blocks ||= []
+  end
+
   before(:each) do
-    puts "JC: before local"
+    blocks.push :anything
   end
 
   after(:each) do
-    puts "JC: after local"
+    blocks.pop
+    blocks.should be_empty
   end
 
   remote_describe "in container of the same deployed app" do
     include TorqueBox::Injectors
 
     before(:each) do
-      puts "JC: before remote"
+      blocks.push :anything
     end
 
     after(:each) do
-      puts "JC: after remote"
+      blocks.pop
+      blocks.size.should == 1
     end
 
     it "remote? should work" do
