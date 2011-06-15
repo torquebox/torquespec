@@ -12,7 +12,7 @@ module TorqueSpec
       @deploy_paths = descriptors.map do |descriptor| 
         DeploymentDescriptor.new(descriptor, 
                                  "#{self.display_name}#{i&&i-=1}", 
-                                 descendants.any? {|x| x.is_a?(TorqueSpec::Daemon::Client)}
+                                 descriptors.last==descriptor && descendants.any? {|x| x.is_a?(TorqueSpec::Daemon::Client)}
                                  ).path
       end
     end
@@ -31,6 +31,10 @@ module TorqueSpec
     end
     def jboss_home
       @jboss_home ||= ENV['JBOSS_HOME'] || jboss_home_from_server_gem
+    end
+    def jruby_home
+      require 'java'
+      File.expand_path(java.lang.System.getProperty('jruby.home'))
     end
     def jboss_home_from_server_gem
       require 'torquebox-server'
@@ -79,6 +83,6 @@ end
 TorqueSpec.configure do |config|
   config.drb_port = 7772
   config.knob_root = ".torquespec"
-  config.jvm_args = "-Xms64m -Xmx1024m -XX:MaxPermSize=512m -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:+CMSClassUnloadingEnabled -Dgem.path=default"
+  config.jvm_args = "-Xms64m -Xmx1024m -XX:MaxPermSize=512m -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:+CMSClassUnloadingEnabled -Djruby.home=#{config.jruby_home}"
 end
 
