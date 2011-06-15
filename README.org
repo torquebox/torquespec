@@ -84,7 +84,8 @@
     TorqueSpec supports "in container" testing via the
     =remote_describe= method.  It behaves exactly like the RSpec
     =describe= method, but the resulting =ExampleGroup= will be run
-    inside the TorqueBox server.
+    inside the TorqueBox server, which is /remote/ relative to the
+    /local/ RSpec process.
 
     If your spec calls =remote_describe=, TorqueSpec will deploy a
     small daemon with your application.  This daemon will act as an
