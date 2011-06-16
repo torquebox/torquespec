@@ -4,5 +4,6 @@ source "http://rubygems.org"
 gemspec
 
 group :development, :test do
-  gem 'torquebox-server', "~> 2.x.incremental.00"
+  gem 'torquebox'
 end
+
