@@ -36,6 +36,8 @@ module TorqueSpec
     def stop
       puts "daemon: stop"
       DRb.stop_service
+    rescue Exception
+      # ignore
     end
 
     def run(alien, reporter)
