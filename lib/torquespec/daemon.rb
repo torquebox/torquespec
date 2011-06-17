@@ -1,14 +1,18 @@
 require 'torquespec'
 require 'rspec/core'
 require 'drb'
+require 'torquebox-core'
 
 module TorqueSpec
   class Daemon
+
+    include TorqueBox::Injectors
 
     def initialize(opts={})
       puts "daemon: create opts=#{opts.inspect}"
       dir = opts['pwd'].to_s
       raise "The 'pwd' option must contain a valid directory name" if dir.empty? || !File.exist?(dir)
+      @analyzer = inject( 'runtime-injection-analyzer' ) 
       Dir.chdir( dir ) do
         RSpec::Core::Runner.disable_autorun! # avoid a bunch of at_exit finalizer errors
         @options = RSpec::Core::ConfigurationOptions.new( opts['argv'].to_a )
@@ -40,6 +44,9 @@ module TorqueSpec
       example_group = @world.example_groups.inject([]) {|all,g| all + g.descendants}.find do |group| 
         group.name.split("::").last == simple_name && group.description == alien.description
       end
+      example_group.descendant_filtered_examples.each do |example| 
+        @analyzer.analyze_and_inject( example.instance_eval {@example_block} )
+      end
       example_group.run( reporter )
     end
 
@@ -67,7 +74,7 @@ module TorqueSpec
         rescue DRb::DRbConnError
           # Overcome DRb.start_service() race condition
           raise unless (attempts-=1) > 0
-          sleep(0.2)
+          sleep(0.4)
           retry
         ensure
           DRb.stop_service

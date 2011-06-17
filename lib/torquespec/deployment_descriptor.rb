@@ -53,6 +53,7 @@ module TorqueSpec
         end
         yaml['ruby'] ||= {}
         yaml['ruby']['version'] ||= RUBY_VERSION[0,3]
+        # yaml['ruby']['compile_mode'] ||= 'off'
         if original != yaml
           File.open( path, 'w' ) do |file|
             YAML.dump( yaml, file )
