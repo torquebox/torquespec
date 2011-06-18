@@ -97,10 +97,10 @@ module RSpec
   module Core
     class Example
       def marshal_dump
-        @metadata
+        [@example_group_class, @metadata]
       end
       def marshal_load metadata
-        @metadata = metadata
+        @example_group_class, @metadata = metadata
       end
     end
   end
