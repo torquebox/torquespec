@@ -6,5 +6,11 @@ remote_describe "scratch pad for failures" do
     fail "That didn't work!"
   end
 
+  describe "nested" do
+    it "should also not work" do
+      fail "whatever"
+    end
+  end
+
 end
 
