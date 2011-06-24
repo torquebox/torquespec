@@ -14,3 +14,11 @@ remote_describe "scratch pad for failures" do
 
 end
 
+remote_describe "java exception" do
+
+  it "should toss an error loading non-existent gems" do
+    require 'java'
+    java.lang.System.getProperty(nil)
+  end
+
+end
