@@ -46,7 +46,7 @@ module TorqueSpec
     def ready?
       response = JSON.parse( domain_api( :operation => "read-attribute",
                                          :name      => "server-state") )
-      response['outcome']=='success' && response['result']=='RUNNING'
+      response['outcome'].downcase=='success' && response['result'].downcase=='running'
     rescue
       false
     end
@@ -54,7 +54,7 @@ module TorqueSpec
     private
 
     def domain_api(params)
-      post('/domain-api', params.merge('json.pretty' => 1).to_json)
+      post('/management', params.merge('json.pretty' => 1).to_json)
     end
 
     def urlify(path)
