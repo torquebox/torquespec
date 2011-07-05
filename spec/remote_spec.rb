@@ -18,7 +18,7 @@ remote_describe "in-container tests" do
 
   it "should work" do
     require 'torquebox/messaging/queue'
-    queue = TorqueBox::Messaging::Queue.start('/queues/foo', :jndi => "")
+    queue = TorqueBox::Messaging::Queue.start('/queues/foo')
     queue.publish('bar')
     queue.receive.should == 'bar'
     queue.stop
