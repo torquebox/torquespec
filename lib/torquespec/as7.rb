@@ -14,7 +14,7 @@ module TorqueSpec
     end
 
     def shutdown
-      domain_api( :operation => "shutdown" )
+      api( :operation => "shutdown" )
     rescue EOFError
       # ignorable
     end
@@ -22,30 +22,30 @@ module TorqueSpec
     def _deploy(path)
       once = true
       begin
-        domain_api( :operation => "add",
-                    :address   => [ "deployment", addressify(path) ],
-                    :content   => [ { :url=>urlify(path)} ] )
-      rescue Exception=>e
+        api( :operation => "add",
+             :address   => [ "deployment", addressify(path) ],
+             :content   => [ { :url=>urlify(path)} ] )
+      rescue Exception
         _undeploy(path)
         if once
           once = false
           retry
         else
-          raise e 
+          raise
         end
       end
-      domain_api( :operation => "deploy",
-                  :address   => [ "deployment", addressify(path) ] )
+      api( :operation => "deploy",
+           :address   => [ "deployment", addressify(path) ] )
     end
 
     def _undeploy(path)
-      domain_api( :operation => "remove",
-                  :address   => [ "deployment", addressify(path) ] )
+      api( :operation => "remove",
+           :address   => [ "deployment", addressify(path) ] )
     end
 
     def ready?
-      response = JSON.parse( domain_api( :operation => "read-attribute",
-                                         :name      => "server-state") )
+      response = JSON.parse( api( :operation => "read-attribute",
+                                  :name      => "server-state") )
       response['outcome'].downcase=='success' && response['result'].downcase=='running'
     rescue
       false
@@ -53,7 +53,7 @@ module TorqueSpec
 
     private
 
-    def domain_api(params)
+    def api(params)
       post('/management', params.merge('json.pretty' => 1).to_json)
     end
 
