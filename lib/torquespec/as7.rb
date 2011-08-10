@@ -58,7 +58,8 @@ module TorqueSpec
     end
 
     def urlify(path)
-      URI.parse(path).scheme.nil? ? "file:#{path}" : path
+      uri = URI.parse(path)
+      uri.scheme.nil? || uri.scheme =~ /^[a-zA-Z]$/ ? "file:#{path}" : path
     end
     
     def addressify(path)
