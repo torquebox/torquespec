@@ -45,7 +45,12 @@ module TorqueSpec
     end
 
     def undeploy(url)
-      _undeploy(url)
+      begin
+        _undeploy(url)
+      rescue Exception=>e 
+        $stderr.puts `jstack #{self.server_pid}`
+        raise e
+      end
     end
 
     def wait_for_ready(timeout)
@@ -67,6 +72,7 @@ module TorqueSpec
       wait = opts[:wait].to_i
       cmd = start_command
       process = IO.popen( cmd )
+      self.server_pid = process.pid
       Thread.new(process) { |console| while(console.gets); end }
       %w{ INT TERM KILL }.each { |signal| trap(signal) { stop } }
       puts "#{cmd}\npid=#{process.pid}"
@@ -96,6 +102,7 @@ module TorqueSpec
     end
 
     attr_accessor :stopped
+    attr_accessor :server_pid
   end
 
 end
