@@ -36,6 +36,9 @@ module TorqueSpec
       require 'java'
       File.expand_path(java.lang.System.getProperty('jruby.home'))
     end
+    def java_home
+      ENV['JAVA_HOME'] || File.expand_path(java.lang.System.getProperty('java.home'))
+    end
     def jboss_home_from_server_gem
       require 'torquebox-server'
       TorqueBox::Server.jboss_home

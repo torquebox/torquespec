@@ -6,7 +6,7 @@ module TorqueSpec
     end
 
     def start_command
-      "#{ENV['JAVA_HOME']}/bin/java -cp #{TorqueSpec.jboss_home}/bin/run.jar #{TorqueSpec.jvm_args} -Djava.endorsed.dirs=#{TorqueSpec.jboss_home}/lib/endorsed org.jboss.Main"
+      "#{TorqueSpec.java_home}/bin/java -cp #{TorqueSpec.jboss_home}/bin/run.jar #{TorqueSpec.jvm_args} -Djava.endorsed.dirs=#{TorqueSpec.jboss_home}/lib/endorsed org.jboss.Main"
     end
 
     def shutdown
