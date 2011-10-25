@@ -19,7 +19,7 @@ module TorqueSpec
   end
 
   class << self
-    attr_accessor :knob_root, :jboss_home, :jvm_args, :max_heap, :lazy, :drb_port
+    attr_accessor :knob_root, :jboss_home, :jvm_args, :max_heap, :lazy, :drb_port, :spec_dir
     def configure
       yield self
     end

@@ -46,7 +46,7 @@ module TorqueSpec
           yaml['application'] ||= {}
           yaml['application']['root'] ||= TorqueSpec.app_root
           yaml['services'] ||= {}
-          yaml['services'].update( 'TorqueSpec::Daemon' => { 'argv' => TorqueSpec.argv, 'pwd' => Dir.pwd } )
+          yaml['services'].update( 'TorqueSpec::Daemon' => { 'argv' => TorqueSpec.argv, 'pwd' => Dir.pwd, 'spec_dir' => TorqueSpec.spec_dir } )
           yaml['environment'] ||= {}
           env = { 'RUBYLIB' => TorqueSpec.rubylib }
           yaml['environment'].update(env) {|k,oldval,newval| "#{oldval}:#{newval}"}
