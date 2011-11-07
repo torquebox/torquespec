@@ -56,14 +56,34 @@ module TorqueSpec
     # Intended to extend an RSpec::Core::ExampleGroup
     module Client
 
+      def torquespec_before_alls
+        if respond_to?(:eval_before_alls)
+          eval_before_alls(new) # v 2.3
+        elsif respond_to?(:run_before_all_hooks)
+          run_before_all_hooks(new) # 2.7
+        else
+          raise "Unknown method to run before(:all) hooks"
+        end
+      end
+
+      def torquespec_after_alls
+        if respond_to?(:eval_after_alls)
+          eval_after_alls(new) # v 2.3
+        elsif respond_to?(:run_after_all_hooks)
+          run_after_all_hooks(new) # 2.7
+        else
+          raise "Unknown method to run after(:all) hooks"
+        end
+      end
+
       def run(reporter)
         begin
-          eval_before_alls(new)
+          torquespec_before_alls
           run_remotely(reporter)
         rescue Exception => ex
           fail_filtered_examples(ex, reporter)
         ensure
-          eval_after_alls(new)
+          torquespec_after_alls
         end
       end
 
