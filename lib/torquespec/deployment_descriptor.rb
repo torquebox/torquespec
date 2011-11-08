@@ -39,9 +39,8 @@ module TorqueSpec
     end
 
     def verify( path )
-      original = YAML.load_file( path )
-      if original.is_a? Hash
-        yaml = original.dup
+      yaml = YAML.load_file( path )
+      if yaml.is_a? Hash
         if @daemonify
           yaml['application'] ||= {}
           yaml['application']['root'] ||= TorqueSpec.app_root
@@ -53,11 +52,8 @@ module TorqueSpec
         end
         yaml['ruby'] ||= {}
         yaml['ruby']['version'] ||= RUBY_VERSION[0,3]
-        # yaml['ruby']['compile_mode'] ||= 'off'
-        if original != yaml
-          File.open( path, 'w' ) do |file|
-            YAML.dump( yaml, file )
-          end
+        File.open( path, 'w' ) do |file|
+          YAML.dump( yaml, file )
         end
       end
       path
