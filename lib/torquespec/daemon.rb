@@ -80,8 +80,6 @@ module TorqueSpec
         begin
           torquespec_before_alls
           run_remotely(reporter)
-        rescue Exception => ex
-          fail_filtered_examples(ex, reporter)
         ensure
           torquespec_after_alls
         end
@@ -139,17 +137,44 @@ class Proc
   end
 end
 
-# We want any Java exceptions tossed on the server to be passed back
-# to the Reporter on the client, and NativeExceptions have no
-# allocator, hence they're not marshalable.
-class NativeException
-  def _dump(*)
-    Marshal.dump( [cause, backtrace] )
+# We want exceptions tossed in the container to be passed back to the
+# client, but there's no guarantee the type of Exception in the
+# container will be available on the client's classpath, so we turn
+# all exceptions into Exceptions.
+module TorqueSpec
+  def self.dump(exception)
+    Marshal.dump( [exception.message, exception.backtrace] )
   end
-  def self._load(str)
-    exception, trace = Marshal.load(str)
+  def self.load_exception(str)
+    message, trace = Marshal.load(str)
+    exception = ::Exception.new(message)
     meta = class << exception; self; end
     meta.send(:define_method, :backtrace) { trace }
     exception
   end
 end
+
+# For ruby exceptions...
+class Exception
+  def _dump(*)
+    TorqueSpec.dump(self)
+  end
+  def self._load(str)
+    TorqueSpec.load_exception(str)
+  end
+end
+
+# And for java exceptions, too.
+module Java
+  module JavaLang
+    class Exception
+      def _dump(*)
+        TorqueSpec.dump(self)
+      end
+      def self._load(str)
+        TorqueSpec.load_exception(str)
+      end
+    end
+  end
+end
+
