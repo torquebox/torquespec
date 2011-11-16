@@ -81,6 +81,7 @@ module TorqueSpec
 
     def post(path, params)
       req = Net::HTTP::Post.new(path)
+      req.content_type = "application/json"
       if (params.is_a? Hash)
         req.set_form_data( params )
       else
