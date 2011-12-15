@@ -47,12 +47,17 @@ module TorqueSpec
     end
   end
 
+  def self.on_windows?
+    java.lang::System.getProperty( "os.name" ) =~ /windows/i
+  end
+  
+
   # A somewhat hackish way of exposing client-side gems to the server-side daemon
   def self.rubylib
     here = File.dirname(__FILE__)
     rspec_libs = Dir.glob(File.expand_path(File.join(here, "../../..", "*{rspec,diff-lcs}*/lib")))
     this_lib = File.expand_path(File.join(here, ".."))
-    rspec_libs.unshift( this_lib ).join(":")
+    rspec_libs.unshift( this_lib ).join(on_windows? ? ";" : ":")
   end
 
   # We must initialize the daemon with the same params as passed to the client
