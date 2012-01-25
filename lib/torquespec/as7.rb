@@ -10,7 +10,7 @@ module TorqueSpec
     end
 
     def start_command
-      "#{TorqueSpec.java_home}/bin/java #{TorqueSpec.jvm_args} -Dorg.jboss.resolver.warning=true -Dsun.rmi.dgc.client.gcInterval=3600000 -Dsun.rmi.dgc.server.gcInterval=3600000 -Dorg.jboss.boot.log.file=#{TorqueSpec.jboss_home}/standalone/log/boot.log -Dlogging.configuration=file:#{TorqueSpec.jboss_home}/standalone/configuration/logging.properties -jar #{TorqueSpec.jboss_home}/jboss-modules.jar -mp #{TorqueSpec.jboss_home}/modules -logmodule org.jboss.logmanager -jaxpmodule javax.xml.jaxp-provider org.jboss.as.standalone -Djboss.home.dir=#{TorqueSpec.jboss_home}"
+      "#{TorqueSpec.java_home}/bin/java #{TorqueSpec.jvm_args} -Dorg.jboss.resolver.warning=true -Dsun.rmi.dgc.client.gcInterval=3600000 -Dsun.rmi.dgc.server.gcInterval=3600000 -Dorg.jboss.boot.log.file=#{TorqueSpec.jboss_home}/standalone/log/boot.log -Dlogging.configuration=file:#{TorqueSpec.jboss_home}/standalone/configuration/logging.properties -jar #{TorqueSpec.jboss_home}/jboss-modules.jar -mp #{TorqueSpec.jboss_home}/modules -jaxpmodule javax.xml.jaxp-provider org.jboss.as.standalone -Djboss.home.dir=#{TorqueSpec.jboss_home}"
     end
 
     def shutdown
