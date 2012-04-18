@@ -1,4 +1,5 @@
 require 'torquespec/deployment_descriptor'
+require 'java'
 
 module TorqueSpec
 
@@ -26,9 +27,6 @@ module TorqueSpec
     def jvm_args
       max_heap ? @jvm_args.sub(/-Xmx\w+/, "-Xmx#{max_heap}") : @jvm_args
     end
-    def domain_mode
-      @domain_mode ||= java.lang.System.getProperty('domain.mode') || ENV['DOMAIN_MODE']
-    end
     def as7?
       File.exist?( File.join( jboss_home, "bin/standalone.sh" ) )
     end
@@ -36,7 +34,6 @@ module TorqueSpec
       @jboss_home ||= ENV['JBOSS_HOME'] || jboss_home_from_server_gem
     end
     def jruby_home
-      require 'java'
       File.expand_path(java.lang.System.getProperty('jruby.home'))
     end
     def java_home
@@ -94,6 +91,7 @@ end
 TorqueSpec.configure do |config|
   config.drb_port = 7772
   config.knob_root = ".torquespec"
+  config.domain_mode = %w(yes true 1).include?(java.lang.System.getProperty('domain.mode') || ENV['DOMAIN_MODE'])
   config.jvm_args = "-Xms64m -Xmx1024m -XX:MaxPermSize=512m -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:+CMSClassUnloadingEnabled -Djruby.home=#{config.jruby_home}"
 end
 
