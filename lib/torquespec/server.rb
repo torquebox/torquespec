@@ -7,6 +7,7 @@ module TorqueSpec
 
     def initialize
       self.extend( TorqueSpec.as7? ? AS7 : AS6 )
+      self.extend( Domain ) if TorqueSpec.domain_mode
     end
 
     def start(opts={})

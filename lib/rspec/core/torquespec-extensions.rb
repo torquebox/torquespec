@@ -53,8 +53,10 @@ require 'torquespec/daemon'
 module TorqueSpec
   module ObjectExtensions
     def remote_describe(*args, &example_group_block)
-      group = describe(*args, &example_group_block)
-      TorqueSpec.remote? ? group : group.extend( TorqueSpec::Daemon::Client )
+      unless TorqueSpec.domain_mode
+        group = describe(*args, &example_group_block)
+        TorqueSpec.remote? ? group : group.extend( TorqueSpec::Daemon::Client )
+      end
     end
   end
 end

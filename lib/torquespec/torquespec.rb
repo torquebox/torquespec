@@ -19,12 +19,15 @@ module TorqueSpec
   end
 
   class << self
-    attr_accessor :knob_root, :jboss_home, :jvm_args, :max_heap, :lazy, :drb_port, :spec_dir
+    attr_accessor :knob_root, :jboss_home, :jvm_args, :max_heap, :lazy, :drb_port, :spec_dir, :domain_mode
     def configure
       yield self
     end
     def jvm_args
       max_heap ? @jvm_args.sub(/-Xmx\w+/, "-Xmx#{max_heap}") : @jvm_args
+    end
+    def domain_mode
+      @domain_mode ||= java.lang.System.getProperty('domain.mode') || ENV['DOMAIN_MODE']
     end
     def as7?
       File.exist?( File.join( jboss_home, "bin/standalone.sh" ) )

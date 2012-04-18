@@ -19,28 +19,23 @@ module TorqueSpec
       # ignorable
     end
 
+    def deployed?(path)
+      response = JSON.parse(api(:operation => "read-children-names", "child-type" => "deployment"))
+      response['result'].include? addressify(path)
+    end
+    
     def _deploy(path)
-      once = true
-      begin
-        api( :operation => "add",
-             :address   => [ "deployment", addressify(path) ],
-             :content   => [ { :url=>urlify(path)} ] )
-      rescue Exception
-        _undeploy(path)
-        if once
-          once = false
-          retry
-        else
-          raise
-        end
-      end
+      _undeploy(path) if deployed?(path)
+      api( :operation => "add",
+           :address   => [{ :deployment => addressify(path) }],
+           :content   => [{ :url => urlify(path) }] )
       api( :operation => "deploy",
-           :address   => [ "deployment", addressify(path) ] )
+           :address   => [{ :deployment => addressify(path) }] )
     end
 
     def _undeploy(path)
       api( :operation => "remove",
-           :address   => [ "deployment", addressify(path) ] )
+           :address   => [{ "deployment" => addressify(path) }] )
     end
 
     def ready?
@@ -65,5 +60,53 @@ module TorqueSpec
     def addressify(path)
       File.basename(path)
     end
+  end
+
+  module Domain
+
+    def host_controller
+      JSON.parse(api(:operation => "read-children-resources", "child-type" => "host"))['result'].first
+    end
+    
+    def server_group
+      @server_group ||= JSON.parse(api(:operation => "read-children-names", "child-type" => "server-group"))['result'].first
+    end
+
+    def start_command
+      "#{TorqueSpec.java_home}/bin/java -D\"[Process Controller]\" #{TorqueSpec.jvm_args} -Djava.net.preferIPv4Stack=true -Dorg.jboss.resolver.warning=true -Dsun.rmi.dgc.client.gcInterval=3600000 -Dsun.rmi.dgc.server.gcInterval=3600000 -Djboss.modules.system.pkgs=org.jboss.byteman -Djava.awt.headless=true -Djboss.domain.default.config=domain.xml -Djboss.host.default.config=host.xml -Dorg.jboss.boot.log.file=#{TorqueSpec.jboss_home}/domain/log/process-controller.log -Dlogging.configuration=file:#{TorqueSpec.jboss_home}/domain/configuration/logging.properties -jar #{TorqueSpec.jboss_home}/jboss-modules.jar -mp #{TorqueSpec.jboss_home}/modules org.jboss.as.process-controller -jboss-home #{TorqueSpec.jboss_home} -jvm #{TorqueSpec.java_home}/bin/java -mp #{TorqueSpec.jboss_home}/modules -- -Dorg.jboss.boot.log.file=#{TorqueSpec.jboss_home}/domain/log/host-controller.log -Dlogging.configuration=file:#{TorqueSpec.jboss_home}/domain/configuration/logging.properties -Xms64m -Xmx512m -XX:MaxPermSize=256m -Djava.net.preferIPv4Stack=true -Dorg.jboss.resolver.warning=true -Dsun.rmi.dgc.client.gcInterval=3600000 -Dsun.rmi.dgc.server.gcInterval=3600000 -Djboss.modules.system.pkgs=org.jboss.byteman -Djava.awt.headless=true -Djboss.domain.default.config=domain.xml -Djboss.host.default.config=host.xml -- -default-jvm #{TorqueSpec.java_home}/bin/java"
+    end
+    
+    def ready?
+      host = host_controller[1]
+      host["server-config"] == host["server"]
+    rescue
+      false
+    end
+
+    def _deploy(path)
+      _undeploy(path) if deployed?(path)
+      api( :operation => "add",
+           :address   => [{ :deployment => addressify(path) }],
+           :content   => [{ :url => urlify(path) }] )
+      api( :operation => "add",
+           :address   => [{"server-group" => server_group}, {:deployment => addressify(path)}],
+           :content   => [{ :url => urlify(path) }] )
+      api( :operation => "deploy",
+           :address   => [{"server-group" => server_group}, {:deployment => addressify(path)}] )
+    end
+
+    def _undeploy(path)
+      api( :operation => "remove",
+           :address   => [{"server-group" => server_group}, {:deployment => addressify(path)}] )
+      api( :operation => "remove",
+           :address   => [{"deployment" => addressify(path)}] )
+    end
+
+    def shutdown
+      api( :operation => "shutdown", :address => [ "host", host_controller[0] ] )
+    rescue EOFError
+      # ignorable
+    end
+
   end
 end
