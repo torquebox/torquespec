@@ -1,6 +1,7 @@
 require 'torquespec'
 require 'rspec/core'
 require 'drb'
+require 'jruby'
 require 'torquebox-core'
 
 module TorqueSpec
@@ -135,6 +136,13 @@ class Proc
   end
   def marshal_load *args
   end
+end
+
+# Fix the same serialization of Proc objects as above, but for JRuby 1.7
+if JRUBY_VERSION > '1.6.8'
+  JRuby.reference(Proc).allocator = lambda { |runtime, klass|
+    Proc.new {}
+  }
 end
 
 # We want exceptions tossed in the container to be passed back to the
