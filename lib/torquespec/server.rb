@@ -70,6 +70,7 @@ module TorqueSpec
     protected
 
     def startup(opts)
+      ENV.delete 'RUBYOPTS' # nukes bundler as injected by rails apps in their test specs
       wait = opts[:wait].to_i
       cmd = start_command
       process = IO.popen( cmd )
