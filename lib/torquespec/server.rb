@@ -13,11 +13,11 @@ module TorqueSpec
     def start(opts={})
       if ready?
         if TorqueSpec.lazy
-          puts "Using running JBoss (try lazy=false if you get errors)"
+          RSpec.configuration.reporter.message "Using running JBoss (try lazy=false if you get errors)" if TorqueSpec.verbose?
           return
         else
           stop
-          puts "Waiting for running JBoss to shutdown"
+          RSpec.configuration.reporter.message "Waiting for running JBoss to shutdown" if TorqueSpec.verbose?
           sleep(5)
           sleep(1) while ready?
           self.stopped = false
@@ -30,19 +30,18 @@ module TorqueSpec
       return if stopped
       self.stopped = true
       if TorqueSpec.lazy
-        puts "JBoss won't be stopped (lazy=true)"
+        RSpec.configuration.reporter.message "JBoss won't be stopped (lazy=true)" if TorqueSpec.verbose?
       else
         shutdown
-        puts "Shutdown message sent to JBoss"
+        RSpec.configuration.reporter.message "Shutdown message sent to JBoss" if TorqueSpec.verbose?
       end
     end
 
     def deploy(url)
       t0 = Time.now
-      print "deploy #{url} "
-      $stdout.flush
+      RSpec.configuration.reporter.message "deploy #{url} " if TorqueSpec.verbose?
       _deploy(url)
-      puts "in #{(Time.now - t0).to_i}s"
+      RSpec.configuration.reporter.message "in #{(Time.now - t0).to_i}s" if TorqueSpec.verbose?
     end
 
     def undeploy(url)
@@ -55,11 +54,11 @@ module TorqueSpec
     end
 
     def wait_for_ready(timeout)
-      puts "Waiting up to #{timeout}s for JBoss to boot"
+      RSpec.configuration.reporter.message "Waiting up to #{timeout}s for JBoss to boot" if TorqueSpec.verbose?
       t0 = Time.now
       while (Time.now - t0 < timeout && !stopped) do
         if ready?
-          puts "JBoss started in #{(Time.now - t0).to_i}s"
+          RSpec.configuration.reporter.message "JBoss started in #{(Time.now - t0).to_i}s" if TorqueSpec.verbose?
           return true
         end
         sleep(1)
@@ -77,7 +76,7 @@ module TorqueSpec
       self.server_pid = process.pid
       Thread.new(process) { |console| while(console.gets); end }
       %w{ INT TERM KILL }.each { |signal| trap(signal) { stop } }
-      puts "#{cmd}\npid=#{process.pid}"
+      RSpec.configuration.reporter.message "#{cmd}\npid=#{process.pid}" if TorqueSpec.verbose?
       wait > 0 ? wait_for_ready(wait) : process.pid
     end
 
