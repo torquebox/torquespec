@@ -20,7 +20,7 @@ module TorqueSpec
   end
 
   class << self
-    attr_accessor :knob_root, :jboss_home, :jvm_args, :max_heap, :lazy, :drb_port, :spec_dir, :domain_mode
+    attr_accessor :knob_root, :jboss_home, :jvm_args, :max_heap, :lazy, :drb_port, :spec_dir, :domain_mode, :verbose
     def configure
       yield self
     end
@@ -44,6 +44,9 @@ module TorqueSpec
       TorqueBox::Server.jboss_home
     rescue Exception
       $stderr.puts "WARN: Unable to determine JBoss install location; set either TorqueSpec.jboss_home or ENV['JBOSS_HOME']"
+    end
+    def verbose?
+      @verbose
     end
   end
 
@@ -93,5 +96,7 @@ TorqueSpec.configure do |config|
   config.knob_root = ".torquespec"
   config.domain_mode = %w(yes true 1).include?(java.lang.System.getProperty('domain.mode') || ENV['DOMAIN_MODE'])
   config.jvm_args = "-Xms64m -Xmx1024m -XX:MaxPermSize=512m -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:+CMSClassUnloadingEnabled -Djruby.home=#{config.jruby_home}"
+  config.verbose = false
 end
+
 
