@@ -96,7 +96,7 @@ TorqueSpec.configure do |config|
   config.knob_root = ".torquespec"
   config.domain_mode = %w(yes true 1).include?(java.lang.System.getProperty('domain.mode') || ENV['DOMAIN_MODE'])
   config.jvm_args = "-Xms64m -Xmx1024m -XX:MaxPermSize=512m -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:+CMSClassUnloadingEnabled -Djruby.home=#{config.jruby_home}"
-  config.verbose = false
+  config.verbose = true
 end
 
 
