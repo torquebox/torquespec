@@ -10,14 +10,18 @@ module TorqueSpec
       self.extend( Domain ) if TorqueSpec.domain_mode
     end
 
+    def message(s)
+      RSpec.configuration.reporter.message(s) if TorqueSpec.verbose?
+    end
+    
     def start(opts={})
       if ready?
         if TorqueSpec.lazy
-          RSpec.configuration.reporter.message "Using running JBoss (try lazy=false if you get errors)" if TorqueSpec.verbose?
+          message "Using running JBoss (try lazy=false if you get errors)"
           return
         else
           stop
-          RSpec.configuration.reporter.message "Waiting for running JBoss to shutdown" if TorqueSpec.verbose?
+          message "Waiting for running JBoss to shutdown"
           sleep(5)
           sleep(1) while ready?
           self.stopped = false
@@ -30,18 +34,18 @@ module TorqueSpec
       return if stopped
       self.stopped = true
       if TorqueSpec.lazy
-        RSpec.configuration.reporter.message "JBoss won't be stopped (lazy=true)" if TorqueSpec.verbose?
+        message "JBoss won't be stopped (lazy=true)"
       else
         shutdown
-        RSpec.configuration.reporter.message "Shutdown message sent to JBoss" if TorqueSpec.verbose?
+        message "Shutdown message sent to JBoss"
       end
     end
 
     def deploy(url)
       t0 = Time.now
-      RSpec.configuration.reporter.message "deploy #{url} " if TorqueSpec.verbose?
+      message "deploy #{url}"
       _deploy(url)
-      RSpec.configuration.reporter.message "in #{(Time.now - t0).to_i}s" if TorqueSpec.verbose?
+      message "deployed in #{(Time.now - t0).to_i}s"
     end
 
     def undeploy(url)
@@ -54,11 +58,11 @@ module TorqueSpec
     end
 
     def wait_for_ready(timeout)
-      RSpec.configuration.reporter.message "Waiting up to #{timeout}s for JBoss to boot" if TorqueSpec.verbose?
+      message "Waiting up to #{timeout}s for JBoss to boot"
       t0 = Time.now
       while (Time.now - t0 < timeout && !stopped) do
         if ready?
-          RSpec.configuration.reporter.message "JBoss started in #{(Time.now - t0).to_i}s" if TorqueSpec.verbose?
+          message "JBoss started in #{(Time.now - t0).to_i}s"
           return true
         end
         sleep(1)
@@ -76,7 +80,7 @@ module TorqueSpec
       self.server_pid = process.pid
       Thread.new(process) { |console| while(console.gets); end }
       %w{ INT TERM KILL }.each { |signal| trap(signal) { stop } }
-      RSpec.configuration.reporter.message "#{cmd}\npid=#{process.pid}" if TorqueSpec.verbose?
+      message "#{cmd}\npid=#{process.pid}"
       wait > 0 ? wait_for_ready(wait) : process.pid
     end
 
