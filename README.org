@@ -206,6 +206,7 @@
    | ~jvm_args~   | Arguments to the JVM running JBoss                             | /see below/   |
    | ~drb_port~   | The in-container spec runner listens on this port for requests | 7772          |
    | ~lazy~       | Whether to use a running JBoss and leave it running when done  | false         |
+   | ~verbose~    | Whether or not to emit extra messages during the run           | true          |
 
    By default, TorqueSpec is initialized thusly:
 
@@ -213,6 +214,7 @@
    :   config.drb_port = 7772
    :   config.knob_root = ".torquespec"
    :   config.jvm_args = "-Xms64m -Xmx1024m -XX:MaxPermSize=512m -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:+CMSClassUnloadingEnabled -Dgem.path=default"
+   :   config.verbose = false
    : end
 
    Include a similar block in your =spec_helper.rb= to customize any of these.
