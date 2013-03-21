@@ -13,7 +13,7 @@ module TorqueSpec
       puts "daemon: create opts=#{opts.inspect}"
       dir = opts['pwd'].to_s
       raise "The 'pwd' option must contain a valid directory name" if dir.empty? || !File.exist?(dir)
-      @analyzer = inject( 'runtime-injection-analyzer' ) 
+      @analyzer = __inject__( 'runtime-injection-analyzer' ) 
       $: << opts['spec_dir'] if opts['spec_dir']
       Dir.chdir( dir ) do
         RSpec::Core::Runner.disable_autorun! # avoid a bunch of at_exit finalizer errors

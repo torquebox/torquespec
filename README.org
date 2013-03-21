@@ -126,7 +126,7 @@
     :   deploy(app)
     : 
     :   it "should work" do
-    :     some_service = inject(com.foo.SomeService)
+    :     some_service = fetch(com.foo.SomeService)
     :     some_service.run.should == 'SUCCESS'
     :   end
     : end
@@ -177,7 +177,7 @@
     :     end
     : 
     :     it "should handle injection" do
-    :       inject( 'service-registry' ).should_not be_nil
+    :       fetch( 'service-registry' ).should_not be_nil
     :     end
     : 
     :   end

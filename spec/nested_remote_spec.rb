@@ -48,7 +48,7 @@ describe "out of the container" do
     end
 
     it "injection should work" do
-      inject( 'service-registry' ).should_not be_nil
+      __inject__( 'service-registry' ).should_not be_nil
     end
   end
 
