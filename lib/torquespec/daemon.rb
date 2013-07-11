@@ -124,6 +124,13 @@ module RSpec
         @metadata = data
       end
     end
+
+    class Time
+      def marshal_dump
+      end
+      def marshal_load data
+      end
+    end
   end
 end
 
