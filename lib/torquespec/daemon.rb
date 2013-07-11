@@ -158,13 +158,16 @@ end
 # all exceptions into Exceptions.
 module TorqueSpec
   def self.dump(exception)
-    Marshal.dump( [exception.message, exception.backtrace] )
+    pending_fixed = exception.pending_fixed? rescue :do_not_add
+    Marshal.dump( [exception.message, exception.backtrace, pending_fixed] )
   end
   def self.load_exception(str)
-    message, trace = Marshal.load(str)
+    message, trace, pending_fixed = Marshal.load(str)
     exception = ::Exception.new(message)
     meta = class << exception; self; end
     meta.send(:define_method, :backtrace) { trace }
+    pending_fixed == :do_not_add or
+      meta.send(:define_method, :pending_fixed?) { pending_fixed }
     exception
   end
 end
