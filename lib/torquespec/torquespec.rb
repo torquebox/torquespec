@@ -48,7 +48,7 @@ module TorqueSpec
       @jboss_home ||= ENV['JBOSS_HOME'] || jboss_home_from_server_gem
     end
     def jruby_home
-      File.expand_path(java.lang.System.getProperty('jruby.home'))
+      ENV['JRUBY_HOME'] || File.expand_path(java.lang.System.getProperty('jruby.home'))
     end
     def java_home
       ENV['JAVA_HOME'] || File.expand_path(java.lang.System.getProperty('java.home'))
