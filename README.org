@@ -206,6 +206,7 @@
    | ~jvm_args~   | Arguments to the JVM running JBoss                             | /see below/   |
    | ~drb_port~   | The in-container spec runner listens on this port for requests | 7772          |
    | ~lazy~       | Whether to use a running JBoss and leave it running when done  | false         |
+   | ~default_deploy~       | Where inside of ~knob_root~ to check for an optional default deployment descriptor  | default_deploy.yml         |
 
    By default, TorqueSpec is initialized thusly:
 
