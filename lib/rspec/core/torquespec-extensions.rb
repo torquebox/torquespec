@@ -38,22 +38,36 @@ TorqueSpec.local {
 
   require 'torquespec/server'
 
+  default_desc = nil
+  if dpath = File.join(TorqueSpec.knob_root, TorqueSpec.default_deploy)
+    if File.exist?(dpath)
+      default_desc = TorqueSpec::DeploymentDescriptor.new(File.open(dpath).read, "default_deploy", false).path
+    end
+  end
+
   TorqueSpec::Configurator.configure do |config|
     config.before(:suite) do
       Thread.current[:app_server] = TorqueSpec::Server.new
       Thread.current[:app_server].start(:wait => 120)
+      Thread.current[:app_server].deploy(default_desc) if default_desc
     end
     
     config.before(:all) do
-      self.class.deploy_paths.each do |path|
-        Thread.current[:app_server].deploy(path)
-      end if self.class.respond_to?( :deploy_paths )
+      if self.class.respond_to?( :deploy_paths )
+        Thread.current[:app_server].undeploy(default_desc) if default_desc && self.class.deploy_paths.size > 0
+        self.class.deploy_paths.each do |path|
+          Thread.current[:app_server].deploy(path)
+        end
+      end
     end
 
     config.after(:all) do
-      self.class.deploy_paths.each do |path|
-        Thread.current[:app_server].undeploy(path)
-      end if self.class.respond_to?( :deploy_paths )
+      if self.class.respond_to?( :deploy_paths )
+        self.class.deploy_paths.each do |path|
+          Thread.current[:app_server].undeploy(path)
+        end 
+        Thread.current[:app_server].deploy(default_desc) if default_desc && self.class.deploy_paths.size > 0 
+      end
     end
 
     config.after(:suite) do
