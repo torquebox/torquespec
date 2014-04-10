@@ -34,7 +34,7 @@ module TorqueSpec
   end
 
   class << self
-    attr_accessor :knob_root, :jboss_home, :jvm_args, :max_heap, :lazy, :drb_port, :spec_dir, :domain_mode, :verbose
+    attr_accessor :knob_root, :jboss_home, :jvm_args, :max_heap, :lazy, :drb_port, :spec_dir, :domain_mode, :verbose, :default_deploy 
     def configure
       yield self
     end
@@ -108,6 +108,7 @@ end
 TorqueSpec.configure do |config|
   config.drb_port = 7772
   config.knob_root = ".torquespec"
+  config.default_deploy = 'default_deploy.yml'
   config.domain_mode = %w(yes true 1).include?(java.lang.System.getProperty('domain.mode') || ENV['DOMAIN_MODE'])
   config.jvm_args = "-Xms64m -Xmx1024m -XX:MaxPermSize=512m -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:+CMSClassUnloadingEnabled -Djruby.home=#{config.jruby_home}"
   config.verbose = true
