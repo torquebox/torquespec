@@ -86,6 +86,8 @@ module TorqueSpec
           eval_after_alls(new) # v 2.3
         elsif respond_to?(:run_after_all_hooks)
           run_after_all_hooks(new) # 2.7
+        elsif respond_to?(:run_after_context_hooks)
+          run_after_context_hooks(new) # 3.0
         else
           raise "Unknown method to run after(:all) hooks"
         end
