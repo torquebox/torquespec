@@ -32,7 +32,11 @@ module TorqueSpec
       Dir.chdir( dir ) do
         RSpec::Core::Runner.disable_autorun! # avoid a bunch of at_exit finalizer errors
         @options = RSpec::Core::ConfigurationOptions.new( opts['argv'].to_a )
-        @options.parse_options
+        if (@options.respond_to?(:parse_options))
+          @options.parse_options
+        else
+          @options.options
+        end
 
         @configuration = RSpec::configuration
         @world         = RSpec::world
