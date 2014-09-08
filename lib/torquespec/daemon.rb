@@ -76,6 +76,8 @@ module TorqueSpec
           eval_before_alls(new) # v 2.3
         elsif respond_to?(:run_before_all_hooks)
           run_before_all_hooks(new) # 2.7
+        elsif respond_to?(:run_before_context_hooks)
+          run_before_context_hooks(new)
         else
           raise "Unknown method to run before(:all) hooks"
         end
