@@ -126,7 +126,11 @@ module TorqueSpec
       end
       
       def deploy_paths
-        [ DeploymentDescriptor.new( {}, display_name, true ).path ]
+        if respond_to?(:display_name)
+          [ DeploymentDescriptor.new( {}, display_name, true ).path ]
+        else
+          [ DeploymentDescriptor.new( {}, description, true ).path ]  
+        end
       end
 
     end
