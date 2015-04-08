@@ -32,7 +32,11 @@ module TorqueSpec
       Dir.chdir( dir ) do
         RSpec::Core::Runner.disable_autorun! # avoid a bunch of at_exit finalizer errors
         @options = RSpec::Core::ConfigurationOptions.new( opts['argv'].to_a )
-        @options.parse_options
+        if (@options.respond_to?(:parse_options))
+          @options.parse_options
+        else
+          @options.options
+        end
 
         @configuration = RSpec::configuration
         @world         = RSpec::world
@@ -76,6 +80,8 @@ module TorqueSpec
           eval_before_alls(new) # v 2.3
         elsif respond_to?(:run_before_all_hooks)
           run_before_all_hooks(new) # 2.7
+        elsif respond_to?(:run_before_context_hooks)
+          run_before_context_hooks(new)
         else
           raise "Unknown method to run before(:all) hooks"
         end
@@ -86,6 +92,8 @@ module TorqueSpec
           eval_after_alls(new) # v 2.3
         elsif respond_to?(:run_after_all_hooks)
           run_after_all_hooks(new) # 2.7
+        elsif respond_to?(:run_after_context_hooks)
+          run_after_context_hooks(new) # 3.0
         else
           raise "Unknown method to run after(:all) hooks"
         end
@@ -118,7 +126,11 @@ module TorqueSpec
       end
       
       def deploy_paths
-        [ DeploymentDescriptor.new( {}, display_name, true ).path ]
+        if respond_to?(:display_name)
+          [ DeploymentDescriptor.new( {}, display_name, true ).path ]
+        else
+          [ DeploymentDescriptor.new( {}, description, true ).path ]  
+        end
       end
 
     end

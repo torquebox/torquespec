@@ -24,11 +24,20 @@ module TorqueSpec
       return @deploy_paths if @deploy_paths
       descriptors += [block.call].flatten if block
       i = descriptors.size > 1 ? 0 : nil
-      @deploy_paths = descriptors.map do |descriptor| 
-        DeploymentDescriptor.new(descriptor, 
-                                 "#{self.display_name}#{i&&i-=1}", 
-                                 descriptors.last==descriptor && descendants.any? {|x| x.is_a?(TorqueSpec::Daemon::Client)}
-                                 ).path
+      if respond_to?(:display_name)
+        @deploy_paths = descriptors.map do |descriptor| 
+          DeploymentDescriptor.new(descriptor, 
+                                   "#{self.display_name}#{i&&i-=1}", 
+                                   descriptors.last==descriptor && descendants.any? {|x| x.is_a?(TorqueSpec::Daemon::Client)}
+                                   ).path
+        end
+      else
+        @deploy_paths = descriptors.map do |descriptor| 
+          DeploymentDescriptor.new(descriptor, 
+                                   "#{self.description}#{i&&i-=1}", 
+                                   descriptors.last==descriptor && descendants.any? {|x| x.is_a?(TorqueSpec::Daemon::Client)}
+                                   ).path
+        end
       end
     end
   end
